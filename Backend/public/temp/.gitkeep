@@ -1,0 +1,5 @@
+<!--
+-> Git does not allow pushing empty folders.
+-> We can make an empty file as a workaround to push empty folders.
+-> File name could have been anything but gitkeep is a good practice.
+-->
