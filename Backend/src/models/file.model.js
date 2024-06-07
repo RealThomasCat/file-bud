@@ -10,7 +10,6 @@ const fileSchema = new Schema(
         },
         thumbnail: {
             type: String, // Cloudinary URL
-            required: true,
         },
         title: {
             type: String,
@@ -22,15 +21,20 @@ const fileSchema = new Schema(
         size: {
             type: String,
         },
-        owner: {
+        ownerId: {
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true
         },
         isHidden: {
             type: Boolean,
             default: false,
         },
+        parentFolder: {
+            type: Schema.Types.ObjectId,
+            ref: 'Folder',
+        }
     },
     {
         timeStamps: true,
