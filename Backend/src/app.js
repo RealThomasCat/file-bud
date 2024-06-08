@@ -40,4 +40,12 @@ app.use(express.static("public"));
 // Used to set and access cookies in the client's browser.
 app.use(cookieParser());
 
+// ROUTES IMPORT
+
+import userRouter from "./routes/user.routes.js";
+
+// ROUTES DECLARATION
+
+app.use("/api/v1/users", userRouter); // Give control to userRouter for any routes starting with /users
+
 export { app };

@@ -9,7 +9,6 @@ const userSchema = new Schema({
         unique: true,
         required: true,
         trim: true,
-        // index ? (Optimization for searching, expensive)
     },
     fullname: {
         type: String,
