@@ -9,6 +9,7 @@ const userSchema = new Schema({
         unique: true,
         required: true,
         trim: true,
+        // Used in register and login, should we index it?
     },
     fullname: {
         type: String,
@@ -22,6 +23,7 @@ const userSchema = new Schema({
     rootFolder: {
         type: Schema.Types.ObjectId,
         ref: "Folder",
+        required: true,
     },
     hiddenFolder: {
         type: Schema.Types.ObjectId,
@@ -29,6 +31,14 @@ const userSchema = new Schema({
     },
     refreshToken: {
         type: String,
+    },
+    storageUsed: {
+        type: Number,
+        default: 0,
+    },
+    maxStorage: {
+        type: Number,
+        default: 1073741824, // 1 GB
     },
 });
 
