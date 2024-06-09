@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-// TODO: Import jwt (To generate tokens)
-// TODO: Import bcrypt (To hash passwords)
+import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt"
 
 // Define User schema
 const userSchema = new Schema({
@@ -42,13 +42,48 @@ const userSchema = new Schema({
     },
 });
 
-// TODO: Add pre-save hook to hash password
+// pre-save hook to hash password
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
 
-// TODO: Add method to compare password using bcrypt
+    this.password = await bcrypt.hash(this.password, 10)
+    next()
+})
 
-// TODO: Add methods to generate refresh token
+// method to compare password using bcrypt
+userSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password)
+}
 
-// TODO: Add method to generate access token (Not stored in DB)
+// method to generate access token (Not stored in DB)
+// This will add a key named generateAccessToken to the methods object 
+// which will have value = provided function()
+userSchema.methods.generateAccessToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            fullname: this.fullname
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
+// method to generate refresh token
+userSchema.methods.generateRefreshToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
 
 // Create and export User model
 export const User = mongoose.model("User", userSchema);
