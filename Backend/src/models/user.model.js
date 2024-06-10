@@ -9,7 +9,7 @@ const userSchema = new Schema({
         unique: true,
         required: true,
         trim: true,
-        // Used in register and login, should we index it?
+        index: true,
     },
     fullname: {
         type: String,

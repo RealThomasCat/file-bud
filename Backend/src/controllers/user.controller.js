@@ -58,7 +58,9 @@ const registerUser = asyncHandler(async (req, res) => {
         // rootFolder: null,
     });
 
-    // Remove password and refreshToken from user object
+    console.log("user: ", user);
+
+    // TODO: Remove password and refreshToken from user object
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     );
@@ -73,6 +75,8 @@ const registerUser = asyncHandler(async (req, res) => {
         title: "Root",
         ownerId: createdUser._id,
     });
+
+    // FIND WORKARROUND FOR THIS (TRANSACTION)
 
     // Check for root folder creation error
     if (!rootFolder) {
@@ -153,7 +157,7 @@ const loginUser = asyncHandler(async (req, res) => {
     delete loggedInUser.password;
     delete loggedInUser.refreshToken;
 
-    // console.log("loggedInUser: ", loggedInUser);
+    console.log("loggedInUser: ", loggedInUser);
 
     // Cookie options
     const options = {
