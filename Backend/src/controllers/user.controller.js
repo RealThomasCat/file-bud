@@ -11,8 +11,8 @@ const generateAccessAndRefreshTokens = async (userId) => {
         const user = await User.findById(userId);
 
         // Generate access and refresh tokens
-        const accessToken = user.generateAccessToken();
-        const refreshToken = user.generateRefreshToken();
+        const accessToken = user.generateAccessToken(); // Short-lived token, for authentication
+        const refreshToken = user.generateRefreshToken(); // Long-lived token, for getting new access token
 
         // Update and save only refreshToken in DB (user document)
         user.refreshToken = refreshToken;
@@ -142,12 +142,12 @@ const loginUser = asyncHandler(async (req, res) => {
             -> Update old user object with refreshtoken and send it in response
     */
 
-    // console.log("user: ", user);
+    // console.log("user: ", user); // DEBUGGING
     // const loggedInUser = { ...user }; // *** DOUBT: Why getting additional fields after spreading user object? ***
 
     // Set password to undefined
     // const loggedInUser = {
-    //     ...user.toObject(), // *** IMPORTANT ***
+    //     ...user.toObject(), // *** WHY toObject() ? ***
     //     password: undefined,
     //     refreshToken: undefined,
     // };
@@ -157,7 +157,7 @@ const loginUser = asyncHandler(async (req, res) => {
     delete loggedInUser.password;
     delete loggedInUser.refreshToken;
 
-    console.log("loggedInUser: ", loggedInUser);
+    // console.log("loggedInUser: ", loggedInUser); // DEBUGGING
 
     // Cookie options
     const options = {
@@ -186,6 +186,41 @@ const loginUser = asyncHandler(async (req, res) => {
         );
 });
 
-// TODO: LOGOUT USER
+// LOGOUT USER
+const logoutUser = asyncHandler(async (req, res) => {
+    /*
+        -> For logging out user first we need to have either id or email of user.
+        -> And only the authorized user can logout, which we can verify using token.
+        -> Before running the logout logic, we will use verifyJWT middleware.
+        -> verifyJWT middleware will first verify the user on basis of access token.
+        -> If token is valid then it will find and add the user object to req object.
+        -> Then out logout method can use req object to get user object.
+    */
 
-export { registerUser, loginUser };
+    // Remove refresh token from DB
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                refreshToken: undefined,
+            },
+        },
+        {
+            new: true, // Return updated document rather than original document
+        }
+    );
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+
+    // Clear cookies and send response
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export { registerUser, loginUser, logoutUser };
