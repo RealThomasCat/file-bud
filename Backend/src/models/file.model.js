@@ -6,7 +6,7 @@ const fileSchema = new Schema(
     {
         fileUrl: {
             type: String, // Cloudinary URL
-            required: true,
+            // required: true,
         },
         thumbnail: {
             type: String, // Cloudinary URL
@@ -34,6 +34,7 @@ const fileSchema = new Schema(
         parentFolder: {
             type: Schema.Types.ObjectId,
             ref: 'Folder',
+            required: true
         }
     },
     {
