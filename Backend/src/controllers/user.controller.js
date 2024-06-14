@@ -28,7 +28,11 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 // REGISTER USER USING TRANSACTION
 const registerUser = asyncHandler(async (req, res) => {
+    // A session is started using mongoose.startSession(), to group multiple operations into a single transaction.
     const session = await mongoose.startSession();
+
+    // The transaction is started with session.startTransaction().
+    // All subsequent operations associated with this session will be part of this transaction.
     session.startTransaction();
     try {
         // Get data from req
@@ -54,12 +58,13 @@ const registerUser = asyncHandler(async (req, res) => {
             throw new ApiError(409, "User already exists");
         }
 
-        // Create a root folder for user
+        // Create a root folder for the user. The { session } parameter ensures this operation is part of the transaction.
         const rootFolder = await Folder.create([{ title: "Root" }], {
             session,
         });
 
-        // Create user object - create entry in DB
+        // Creates the user and links the root folder's ID to the user.
+        // Again, { session } ensures this operation is part of the transaction.
         const user = await User.create(
             [
                 {
@@ -72,15 +77,18 @@ const registerUser = asyncHandler(async (req, res) => {
             { session }
         );
 
-        // Update root folder with ownerId
+        // Updates the root folder to include the owner's ID and saves it within the transaction.
         rootFolder[0].ownerId = user[0]._id;
         await rootFolder[0].save({ validateBeforeSave: false, session }); // Skip validation (improve performance)
 
-        // Commit the transaction
+        // If all operations succeed, session.commitTransaction() commits the transaction, making all changes permanent.
+        // The session is then ended with session.endSession().
         await session.commitTransaction();
         session.endSession();
 
-        // TODO: Remove password and refreshToken from user object
+        // END TRANSACTION
+
+        // Remove password and refreshToken from user object
         const createdUser = await User.findById(user[0]._id).select(
             "-password -refreshToken"
         );
@@ -101,7 +109,10 @@ const registerUser = asyncHandler(async (req, res) => {
                 )
             );
     } catch (error) {
+        // If any operation fails, the catch block is executed. session.abortTransaction() aborts the transaction, rolling back all changes.
         await session.abortTransaction();
+
+        // The session is then ended, and the error is thrown to be handled by the error-handling middleware.
         session.endSession();
         throw error;
     }
@@ -164,7 +175,7 @@ const registerUserOld = asyncHandler(async (req, res) => {
     if (!rootFolder) {
         throw new ApiError(
             500,
-            "Something went wront while creating root folder"
+            "Something went wrong while creating root folder"
         );
     }
 
