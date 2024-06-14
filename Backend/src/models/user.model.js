@@ -24,6 +24,7 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Folder",
         default: null,
+        required: true,
     },
     hiddenFolder: {
         type: Schema.Types.ObjectId,

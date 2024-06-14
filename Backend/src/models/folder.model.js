@@ -11,21 +11,25 @@ const folderSchema = new Schema(
         ownerId: {
             type: Schema.Types.ObjectId,
             ref: "User",
-            required: true,
-            index: true
+            // required: true,
+            index: true,
         },
-        files: [{
-            type: Schema.Types.ObjectId,
-            ref: 'File',
-        }],
-        subfolders: [{
-            type: Schema.Types.ObjectId,
-            ref: 'Folder',
-        }],
+        files: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "File",
+            },
+        ],
+        subfolders: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Folder",
+            },
+        ],
         parentFolder: {
             type: Schema.Types.ObjectId,
-            ref: 'Folder',
-        }
+            ref: "Folder",
+        },
     },
     {
         timeStamps: true,
