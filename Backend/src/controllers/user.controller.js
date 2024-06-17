@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Folder } from "../models/folder.model.js";
+import { File } from "../models/file.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 // Method to generate access and refresh tokens
@@ -85,8 +86,6 @@ const registerUser = asyncHandler(async (req, res) => {
         // The session is then ended with session.endSession().
         await session.commitTransaction();
         session.endSession();
-
-        // END TRANSACTION
 
         // Remove password and refreshToken from user object
         const createdUser = await User.findById(user[0]._id).select(
@@ -316,4 +315,109 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
-export { registerUser, loginUser, logoutUser };
+// FETCH FOLDER
+const fetchFolder = asyncHandler(async (req, res) => {
+    // Get folder id from req
+    const { folderId } = req.params;
+
+    // Find folder using folderId
+    const folder = await Folder.findById(folderId);
+
+    // If folder does not exist then throw error
+    if (!folder) {
+        throw new ApiError(404, "Folder not found");
+    }
+
+    // Send folder object in response (contains file array and subfolder array to display in frontend)
+    return res.status(200).json(new ApiResponse(200, folder, "Folder found"));
+});
+
+// FETCH FILE (HOW TO DISPLAY FILE IN BROWSER?)
+const fetchFile = asyncHandler(async (req, res) => {
+    // Get file id from req
+    const { fileId } = req.params;
+
+    // Find file using fileId
+    const file = await File.findById(fileId);
+
+    // If file does not exist then throw error
+    if (!file) {
+        throw new ApiError(404, "File not found");
+    }
+
+    // Send file object in response
+    return res.status(200).json(new ApiResponse(200, file, "File found"));
+});
+
+// CREATE NEW FOLDER
+const createFolder = asyncHandler(async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        // Get data from req (user comes from token)
+        const { currFolderId, title, user } = req.body;
+
+        // Trim folder title and throw error if it is empty
+        if (!title?.trim()) {
+            throw new ApiError(400, "Please provide folder title");
+        }
+
+        // If current folder id is not provided then throw error
+        if (!currFolderId) {
+            throw new ApiError(400, "Parent folder information is missing");
+        }
+
+        // TODO: Check current folder actually exists and belongs to user
+
+        // If parent folder does not exist then throw error
+        if (!parentFolder) {
+            throw new ApiError(404, "Parent folder not found");
+        }
+
+        // Check if same title folder already exists in parent folder's subfolders array
+        const existedFolder = parentFolder.subfolders.find(
+            (folder) => folder.title === title
+        );
+
+        // TODO: If folder already exists then append a count to title
+
+        // Create new folder (transactional operation)
+        const newFolder = await Folder.create(
+            {
+                title,
+                ownerId: user._id,
+            },
+            { session }
+        );
+
+        // Add new folder id to parent folder's subfolders array
+        parentFolder.subfolders.push(newFolder._id);
+
+        // Save parent folder (transactional operation)
+        await parentFolder.save({ session });
+
+        // COMMIT TRANSACTION
+        await session.commitTransaction();
+        session.endSession();
+
+        // Send response
+        return res
+            .status(201)
+            .json(
+                new ApiResponse(200, newFolder, "Folder created successfully")
+            );
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
+});
+
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    fetchFolder,
+    fetchFile,
+    createFolder,
+};
