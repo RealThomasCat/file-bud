@@ -315,7 +315,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
-// FETCH FOLDER
+// FETCH FOLDER (TODO: CHECK IF FOLDER BELONGS TO USER)
 const fetchFolder = asyncHandler(async (req, res) => {
     // Get folder id from req
     const { folderId } = req.params;
@@ -332,7 +332,7 @@ const fetchFolder = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, folder, "Folder found"));
 });
 
-// FETCH FILE (HOW TO DISPLAY FILE IN BROWSER?)
+// FETCH FILE (HOW TO DISPLAY FILE IN BROWSER?)  (TODO: CHECK IF FOLDER BELONGS TO USER)
 const fetchFile = asyncHandler(async (req, res) => {
     // Get file id from req
     const { fileId } = req.params;
