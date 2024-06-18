@@ -315,7 +315,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
-// FETCH FOLDER (TODO: CHECK IF FOLDER BELONGS TO USER)
+// FETCH FOLDER
 const fetchFolder = asyncHandler(async (req, res) => {
     // Get folder id from req
     const { folderId } = req.params;
@@ -328,11 +328,16 @@ const fetchFolder = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Folder not found");
     }
 
+    // Check if folder belongs to user
+    if (folder.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
     // Send folder object in response (contains file array and subfolder array to display in frontend)
     return res.status(200).json(new ApiResponse(200, folder, "Folder found"));
 });
 
-// FETCH FILE (HOW TO DISPLAY FILE IN BROWSER?)  (TODO: CHECK IF FOLDER BELONGS TO USER)
+// FETCH FILE
 const fetchFile = asyncHandler(async (req, res) => {
     // Get file id from req
     const { fileId } = req.params;
@@ -345,8 +350,46 @@ const fetchFile = asyncHandler(async (req, res) => {
         throw new ApiError(404, "File not found");
     }
 
-    // Send file object in response
-    return res.status(200).json(new ApiResponse(200, file, "File found"));
+    // Check if file belongs to user
+    if (file.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
+    // Get file url from file object
+    const fileURL = file.fileUrl;
+
+    // If file url is not found throw error
+    if (!fileURL) {
+        throw new ApiError(404, "File data not found");
+    }
+
+    // TODO: Bring file from cloudinary to server's public/temp folder
+
+    // TODO: GAND FATT GYI
+
+    // TODO: Construct file path
+
+    //  Creates a readable stream from the file located at filePath.
+    const fileStream = fs.createReadStream(filePath);
+
+    // Sets up an event listener on the fileStream to handle the 'open' event, which is emitted when the file is successfully opened for reading.
+    fileStream.on("open", () => {
+        // Sets the Content-Type header of the HTTP response to the MIME type of the file.
+        // This informs the browser about the type of file being sent
+        res.setHeader("Content-Type", file.mimeType);
+
+        // Pipe the data from the file stream directly to the HTTP response.
+        // This streams the file content to the client as it is read from disk.
+        fileStream.pipe(res);
+    });
+
+    //  Set up an event listener on the fileStream to handle the 'error' event, which is emitted if an error occurs while reading the file.
+    fileStream.on("error", (err) => {
+        throw new ApiError(500, "Error reading file");
+    });
+
+    // Send file object in response ?
+    // return res.status(200).json(new ApiResponse(200, file, "File found"));
 });
 
 // CREATE NEW FOLDER
