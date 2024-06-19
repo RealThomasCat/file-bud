@@ -3,7 +3,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { Folder } from "../models/folder.model.js";
-import { File } from "../models/file.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 // Method to generate access and refresh tokens
@@ -337,61 +336,6 @@ const fetchFolder = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, folder, "Folder found"));
 });
 
-// FETCH FILE
-const fetchFile = asyncHandler(async (req, res) => {
-    // Get file id from req
-    const { fileId } = req.params;
-
-    // Find file using fileId
-    const file = await File.findById(fileId);
-
-    // If file does not exist then throw error
-    if (!file) {
-        throw new ApiError(404, "File not found");
-    }
-
-    // Check if file belongs to user
-    if (file.ownerId.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "Unauthorized access");
-    }
-
-    // Get file url from file object
-    const fileURL = file.fileUrl;
-
-    // If file url is not found throw error
-    if (!fileURL) {
-        throw new ApiError(404, "File data not found");
-    }
-
-    // TODO: Bring file from cloudinary to server's public/temp folder
-
-    // TODO: GAND FATT GYI
-
-    // TODO: Construct file path
-
-    //  Creates a readable stream from the file located at filePath.
-    const fileStream = fs.createReadStream(filePath);
-
-    // Sets up an event listener on the fileStream to handle the 'open' event, which is emitted when the file is successfully opened for reading.
-    fileStream.on("open", () => {
-        // Sets the Content-Type header of the HTTP response to the MIME type of the file.
-        // This informs the browser about the type of file being sent
-        res.setHeader("Content-Type", file.mimeType);
-
-        // Pipe the data from the file stream directly to the HTTP response.
-        // This streams the file content to the client as it is read from disk.
-        fileStream.pipe(res);
-    });
-
-    //  Set up an event listener on the fileStream to handle the 'error' event, which is emitted if an error occurs while reading the file.
-    fileStream.on("error", (err) => {
-        throw new ApiError(500, "Error reading file");
-    });
-
-    // Send file object in response ?
-    // return res.status(200).json(new ApiResponse(200, file, "File found"));
-});
-
 // CREATE NEW FOLDER
 const createFolder = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
@@ -456,11 +400,4 @@ const createFolder = asyncHandler(async (req, res) => {
     }
 });
 
-export {
-    registerUser,
-    loginUser,
-    logoutUser,
-    fetchFolder,
-    fetchFile,
-    createFolder,
-};
+export { registerUser, loginUser, logoutUser, fetchFolder, createFolder };
