@@ -43,9 +43,13 @@ app.use(cookieParser());
 // ROUTES IMPORT
 
 import userRouter from "./routes/user.routes.js";
+import fileRouter from "./routes/file.routes.js";
+import folderRouter from "./routes/folder.routes.js";
 
 // ROUTES DECLARATION
 
 app.use("/api/v1/users", userRouter); // Give control to userRouter for any routes starting with /users
+app.use("/api/v1/files", fileRouter);
+app.use("/api/v1/folders", folderRouter);
 
 export { app };

@@ -7,6 +7,8 @@ const router = Router();
 
 // Routes
 // Secured routes
+router.route("/fetchFile").post(verifyJWT, fetchFile);
 router.route("/uploadFile").post(verifyJWT, uploadFile);
+router.route("/downloadFile").post(verifyJWT, downloadFile);
 
 export default router;

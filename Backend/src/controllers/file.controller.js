@@ -65,4 +65,10 @@ const fetchFile = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, downloadedFile, "File found"));
 });
 
-export { fetchFile };
+// UPLOAD FILE
+const uploadFile = asyncHandler(async (req, res) => {});
+
+// DOWNLOAD FILE
+const downloadFile = asyncHandler(async (req, res) => {});
+
+export { fetchFile, uploadFile, downloadFile };
