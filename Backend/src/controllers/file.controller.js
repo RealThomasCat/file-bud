@@ -150,6 +150,32 @@ const uploadFile = asyncHandler(async (req, res) => {
 });
 
 // DOWNLOAD FILE
-const downloadFile = asyncHandler(async (req, res) => {});
+const downloadFile = asyncHandler(async (req, res) => {
+    const { fileId } = req.body;
+
+    // console.log(fileId);
+
+    // console.log(req.user._id);
+
+    // const { _id, email, rootFolder } = req.user;
+
+    // const FileExists = await File.findOne({ fil });
+    const requestedFile = await File.findById(fileId);
+    // console.log(_id);
+    console.log(requestedFile)
+
+    // If user exists then throw error
+    if (!requestedFile) {
+        throw new ApiError(409, "File does not Exist");
+    }
+
+    // Check if requested file belongs to user, if not throw error
+    if (requestedFile.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
+
+
+});
 
 export { fetchFile, uploadFile, downloadFile };
