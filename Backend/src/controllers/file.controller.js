@@ -1,6 +1,10 @@
 import { File } from "../models/file.model.js";
+import { Folder } from "../models/folder.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { downloadFromCloudinary } from "../utils/cloudinary.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 // FETCH FILE
 const fetchFile = asyncHandler(async (req, res) => {
@@ -65,8 +69,85 @@ const fetchFile = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, downloadedFile, "File found"));
 });
 
-// UPLOAD FILE
-const uploadFile = asyncHandler(async (req, res) => {});
+// UPLOAD FILE (TODO: TESTING)
+const uploadFile = asyncHandler(async (req, res) => {
+    const fileLocalPath = req.file?.path;
+
+    // console.log(req.file); // DEBUGGING
+
+    if (!fileLocalPath) {
+        throw new ApiError(400, "File not uploaded");
+    }
+
+    // Check if file with same name already exists in current folder
+    // Fetch current folder
+    const currentFolder = await Folder.findById(req.body.folderId);
+
+    // If currentFolder does not exist then throw error
+    if (!currentFolder) {
+        throw new ApiError(404, "Folder not found");
+    }
+
+    // Check if current folder belongs to user, if not throw error
+    if (currentFolder.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
+    // Obtain current folder's files array
+    const currentFolderFiles = currentFolder.files;
+
+    // Check if file with same name already exists in current folder
+
+    let originalFileName = req.file.originalname;
+
+    // Make a function to check if file exists in current folder
+    const fileExists = (name) =>
+        currentFolderFiles.some((file) => file.name === name);
+
+    let newFileName = originalFileName;
+    let count = 1;
+    while (fileExists(newFileName)) {
+        const nameParts = originalFileName.split(".");
+        const baseName = nameParts.slice(0, -1).join(".");
+        const extension =
+            nameParts.length > 1 ? `.${nameParts[nameParts.length - 1]}` : "";
+        newFileName = `${baseName} (${count})${extension}`;
+        count++;
+    }
+
+    console.log(fileLocalPath); // DEBUGGING
+
+    let newFilePath = fileLocalPath;
+
+    // Rename the file in the temp folder if the name has changed
+    if (newFileName !== originalFileName) {
+        const tempFolderPath = path.dirname(fileLocalPath);
+        newFilePath = path.join(tempFolderPath, newFileName);
+        fs.renameSync(fileLocalPath, newFilePath);
+    }
+
+    console.log(newFileName); // DEBUGGING
+
+    const file = await uploadToCloudinary(newFilePath);
+
+    if (!file) {
+        throw new ApiError(500, "Error uploading file");
+    }
+
+    // Create new file object in database
+    const newFile = await File.create({
+        title: newFileName,
+        fileUrl: file.secure_url,
+        mimeType: file.format,
+        size: file.bytes,
+        ownerId: req.user._id,
+    });
+
+    // TODO: Add new file to current folder's files array
+
+    // Send file object in response
+    res.status(200).json(new ApiResponse(200, file, "File uploaded"));
+});
 
 // DOWNLOAD FILE
 const downloadFile = asyncHandler(async (req, res) => {});

@@ -1,14 +1,19 @@
 import { Router } from "express";
-import { uploadFile } from "../controllers/file.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+    uploadFile,
+    fetchFile,
+    downloadFile,
+} from "../controllers/file.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 // Creating a new router
 const router = Router();
 
 // Routes
 // Secured routes
-router.route("/fetchFile").post(verifyJWT, fetchFile);
-router.route("/uploadFile").post(verifyJWT, uploadFile);
-router.route("/downloadFile").post(verifyJWT, downloadFile);
+router.route("/fetch").post(verifyJWT, fetchFile);
+router.route("/upload").post(verifyJWT, upload.single("file"), uploadFile); // TODO: Make secure
+router.route("/download").post(verifyJWT, downloadFile);
 
 export default router;

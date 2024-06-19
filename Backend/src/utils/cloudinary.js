@@ -1,6 +1,13 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
+// Debugging
+console.log(
+    process.env.CLOUDINARY_CLOUD_NAME,
+    process.env.CLOUDINARY_API_KEY,
+    process.env.CLOUDINARY_API_SECRET
+);
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -8,7 +15,7 @@ cloudinary.config({
 });
 
 // UPLOAD FILE TO CLOUDINARY
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadToCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null;
         //upload the file on cloudinary
@@ -17,11 +24,11 @@ const uploadOnCloudinary = async (localFilePath) => {
         });
 
         // file has been uploaded successfully
-        //console.log("file is uploaded on cloudinary ", response.url);
         fs.unlinkSync(localFilePath);
         return response;
     } catch (error) {
         fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation got failed
+        console.log("Error uploading file to cloudinary", error.message);
         return null;
     }
 };
@@ -48,4 +55,4 @@ const downloadFromCloudinary = async (fileURL) => {
     }
 };
 
-export { uploadOnCloudinary, downloadFromCloudinary };
+export { uploadToCloudinary, downloadFromCloudinary };

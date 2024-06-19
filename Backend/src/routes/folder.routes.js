@@ -4,7 +4,7 @@ import {
     createFolder,
     fetchFolder,
     deleteFolder,
-} from "../controllers/user.controller.js";
+} from "../controllers/folder.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 // Creating a new router
