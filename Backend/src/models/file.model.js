@@ -8,6 +8,10 @@ const fileSchema = new Schema(
             type: String, // Cloudinary URL
             // required: true,
         },
+        publicId: {
+            type: String, // Cloudinary public ID
+            required: true,
+        },
         thumbnail: {
             type: String, // Cloudinary URL
         },
@@ -19,13 +23,13 @@ const fileSchema = new Schema(
             type: String,
         },
         size: {
-            type: String,
+            type: Number,
         },
         ownerId: {
             type: Schema.Types.ObjectId,
             ref: "User",
             required: true,
-            index: true
+            index: true,
         },
         isHidden: {
             type: Boolean,
@@ -33,9 +37,17 @@ const fileSchema = new Schema(
         },
         parentFolder: {
             type: Schema.Types.ObjectId,
-            ref: 'Folder',
-            required: true
-        }
+            ref: "Folder",
+            required: true,
+        },
+        format: {
+            type: String,
+            required: true,
+        },
+        resourceType: {
+            type: String,
+            required: true,
+        },
     },
     {
         timeStamps: true,
