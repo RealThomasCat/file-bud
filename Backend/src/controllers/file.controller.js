@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import axios from "axios";
 import mongoose from "mongoose";
 import { File } from "../models/file.model.js";
 import { Folder } from "../models/folder.model.js";
@@ -231,6 +232,51 @@ const uploadFile = asyncHandler(async (req, res) => {
 });
 
 // DOWNLOAD FILE
-const downloadFile = asyncHandler(async (req, res) => {});
+const downloadFile = asyncHandler(async (req, res) => {
+    const { fileId } = req.body;
+
+    const requestedFile = await File.findById(fileId);
+    // console.log(_id);
+    console.log(requestedFile);
+
+    // If user exists then throw error
+    if (!requestedFile) {
+        throw new ApiError(409, "File does not Exist");
+    }
+
+    // Check if requested file belongs to user, if not throw error
+    if (requestedFile.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
+    try {
+        const response = await axios({
+            url: requestedFile.fileUrl,
+            method: "GET",
+            responseType: "stream",
+        });
+
+        // Set the appropriate headers
+        const File_mimeType =
+            requestedFile.resourceType + "/" + requestedFile.format;
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${requestedFile.title}"`
+        );
+        res.setHeader("Content-Type", File_mimeType);
+
+        // Log headers for debugging (optional)
+        console.log(
+            `Content-Disposition: attachment; filename="${requestedFile.title}"`
+        );
+        console.log(`Content-Type: ${File_mimeType}`);
+
+        // Pipe the response data to the client
+        response.data.pipe(res);
+    } catch (error) {
+        console.error("Error downloading file:", error);
+        res.status(500).send("Error downloading file");
+    }
+});
 
 export { fetchFile, uploadFile, downloadFile };
