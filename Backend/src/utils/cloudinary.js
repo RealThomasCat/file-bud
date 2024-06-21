@@ -55,4 +55,18 @@ const downloadFromCloudinary = async (fileURL) => {
     }
 };
 
-export { uploadToCloudinary, downloadFromCloudinary };
+// DELETE FILE FROM CLOUDINARY (TODO: TEST)
+const deleteFromCloudinary = async (fileURL) => {
+    try {
+        if (!fileURL) return null;
+
+        // Fetch the file from cloudinary
+        const response = await cloudinary.uploader.destroy(fileURL);
+
+        return response;
+    } catch (error) {
+        return null;
+    }
+};
+
+export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary };

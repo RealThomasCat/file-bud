@@ -1,12 +1,16 @@
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
 import { File } from "../models/file.model.js";
 import { Folder } from "../models/folder.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { downloadFromCloudinary } from "../utils/cloudinary.js";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
+import {
+    uploadToCloudinary,
+    deleteFromCloudinary,
+} from "../utils/cloudinary.js";
 
 // FETCH FILE
 const fetchFile = asyncHandler(async (req, res) => {
@@ -71,107 +75,159 @@ const fetchFile = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, downloadedFile, "File found"));
 });
 
-// UPLOAD FILE (TODO: ADD TRANSACTION AND UPDATE USER STORAGE USED)
+// UPLOAD FILE *** DOUBT *** (TODO: Thumbnail, File deletion from cloudiary)
 const uploadFile = asyncHandler(async (req, res) => {
-    // Extract file path from request
-    const fileLocalPath = req.file?.path;
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // If file path is not found throw error
-    if (!fileLocalPath) {
-        throw new ApiError(400, "File not uploaded");
+    // To keep track if file is uploaded to cloudinary
+    let cloudinaryPublicId = null;
+
+    try {
+        // Extract file path, original name and current folder id from request
+        const fileLocalPath = req.file?.path;
+        const originalName = req.file?.originalname;
+        const currentFolderId = req.body.folderId;
+
+        if (!fileLocalPath) {
+            throw new ApiError(400, "File not uploaded");
+        }
+
+        if (!originalName) {
+            throw new ApiError(400, "File name not found");
+        }
+
+        if (!currentFolderId) {
+            throw new ApiError(400, "Folder not selected");
+        }
+
+        const temp = await Folder.findById(currentFolderId);
+
+        console.log("Current folder before populate:", temp); // DEBUGGING
+
+        // Check if file with same name already exists in current folder
+        // Fetch current folder
+        const currentFolder = await Folder.findById(currentFolderId)
+            .populate("files")
+            .session(session);
+
+        console.log("Current folder after populate:", currentFolder); // DEBUGGING
+
+        // If currentFolder does not exist then throw error
+        if (!currentFolder) {
+            throw new ApiError(404, "Folder not found");
+        }
+
+        // Check if current folder belongs to user, if not throw error
+        if (currentFolder.ownerId.toString() !== req.user._id.toString()) {
+            throw new ApiError(403, "Unauthorized access");
+        }
+
+        // Obtain current folder's files array
+        const currentFolderFiles = currentFolder.files.map((file) =>
+            file.toObject()
+        );
+
+        // Check if file with same name already exists in current folder
+
+        let originalFileName = req.file.originalname;
+
+        // Make a function to check if file exists in current folder
+        const fileExists = (name) =>
+            currentFolderFiles.some((file) => file.title === name);
+
+        let newFileName = originalFileName;
+        let count = 1;
+        while (fileExists(newFileName)) {
+            const nameParts = originalFileName.split(".");
+            const baseName = nameParts.slice(0, -1).join(".");
+            const extension =
+                nameParts.length > 1
+                    ? `.${nameParts[nameParts.length - 1]}`
+                    : "";
+            newFileName = `${baseName} (${count})${extension}`;
+            count++;
+        }
+
+        console.log("Old file local path", fileLocalPath); // DEBUGGING
+        console.log("Old file name", originalFileName); // DEBUGGING
+
+        let newFilePath = fileLocalPath;
+
+        // Rename the file in the temp folder if the name has changed
+        if (newFileName !== originalFileName) {
+            const tempFolderPath = path.dirname(fileLocalPath);
+            newFilePath = path.join(tempFolderPath, newFileName);
+            fs.renameSync(fileLocalPath, newFilePath);
+        }
+
+        console.log("New file local path ", newFilePath); // DEBUGGING
+        console.log("New file name ", newFileName); // DEBUGGING
+
+        const uploadedFile = await uploadToCloudinary(newFilePath);
+
+        if (!uploadedFile) {
+            throw new ApiError(500, "Error uploading file");
+        }
+
+        cloudinaryPublicId = uploadedFile.public_id;
+
+        // Create new file object in database (Returns array of created files, we need to extract first element)
+        const file = await File.create(
+            [
+                {
+                    title: newFileName,
+                    fileUrl: uploadedFile.url,
+                    thumbnail: uploadedFile?.thumbnail_url, // Thubnail url has to be configured in cloudinary
+                    size: uploadedFile.bytes,
+                    duration: uploadedFile?.duration,
+                    ownerId: req.user._id,
+                    parentFolder: currentFolder._id,
+                    publicId: uploadedFile.public_id,
+                    format: uploadedFile.format,
+                    resourceType: uploadedFile.resource_type,
+                },
+            ],
+            { session }
+        );
+
+        // ***** DOUBT ***** (Populated cuurentFolder contains file objects, not file ids, but still eveything is working fine, check if it is correct or not)
+        currentFolder.files.push(file[0]._id);
+        await currentFolder.save({ session, validateBeforeSave: false }); // DOUBT
+
+        console.log("Current folder after pushing:", currentFolder); // DEBUGGING
+
+        // Update user's storage used
+        const user = req.user;
+        console.log("User storage used before", user.storageUsed); // DEBUGGING
+        user.storageUsed += uploadedFile.bytes;
+        console.log("User storage used after", user.storageUsed); // DEBUGGING
+        await user.save({ session, validateBeforeSave: false });
+
+        // Commit the transaction and end the session
+        await session.commitTransaction();
+        session.endSession();
+
+        // Remove publicId and fileUrl from file object before sending in response
+        const createdFile = file[0].toObject();
+        delete createdFile.publicId;
+        delete createdFile.fileUrl;
+
+        // Send file object in response
+        return res
+            .status(200)
+            .json(new ApiResponse(200, createdFile, "File uploaded"));
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+
+        // Delete file from cloudinary if uploaded before error (TODO: ENSURE DELTION ALWAYS HAPPENS SUCCESSFULLY)
+        if (cloudinaryPublicId) {
+            await deleteFromCloudinary(cloudinaryPublicId);
+        }
+
+        throw new ApiError(500, error.message); // Correct???
     }
-
-    // Check if file with same name already exists in current folder
-    // Fetch current folder
-    const currentFolder = await Folder.findById(req.body.folderId).populate(
-        "files"
-    );
-    // const currentFolder = await Folder.findById(req.body.folderId); // OLD
-
-    // If currentFolder does not exist then throw error
-    if (!currentFolder) {
-        throw new ApiError(404, "Folder not found");
-    }
-
-    // Check if current folder belongs to user, if not throw error
-    if (currentFolder.ownerId.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "Unauthorized access");
-    }
-
-    // Obtain current folder's files array
-    const currentFolderFiles = currentFolder.files.map((file) =>
-        file.toObject()
-    );
-
-    // Check if file with same name already exists in current folder
-
-    let originalFileName = req.file.originalname;
-
-    // Make a function to check if file exists in current folder
-    const fileExists = (name) =>
-        currentFolderFiles.some((file) => file.title === name);
-
-    let newFileName = originalFileName;
-    let count = 1;
-    while (fileExists(newFileName)) {
-        const nameParts = originalFileName.split(".");
-        const baseName = nameParts.slice(0, -1).join(".");
-        const extension =
-            nameParts.length > 1 ? `.${nameParts[nameParts.length - 1]}` : "";
-        newFileName = `${baseName} (${count})${extension}`;
-        count++;
-    }
-
-    // console.log("Old file local path", fileLocalPath); // DEBUGGING
-    // console.log("Old file name", originalFileName); // DEBUGGING
-
-    let newFilePath = fileLocalPath;
-
-    // Rename the file in the temp folder if the name has changed
-    if (newFileName !== originalFileName) {
-        const tempFolderPath = path.dirname(fileLocalPath);
-        newFilePath = path.join(tempFolderPath, newFileName);
-        fs.renameSync(fileLocalPath, newFilePath);
-    }
-
-    // console.log("New file local path ", newFilePath); // DEBUGGING
-    // console.log("New file name ", newFileName); // DEBUGGING
-
-    const uploadedFile = await uploadToCloudinary(newFilePath);
-
-    if (!uploadedFile) {
-        throw new ApiError(500, "Error uploading file");
-    }
-
-    // Create new file object in database
-    const file = await File.create({
-        title: newFileName,
-        fileUrl: uploadedFile.url,
-        size: uploadedFile.bytes,
-        duration: uploadedFile?.duration,
-        ownerId: req.user._id,
-        parentFolder: currentFolder._id,
-        publicId: uploadedFile.public_id,
-        format: uploadedFile.format,
-        resourceType: uploadedFile.resource_type,
-    });
-
-    // If file is not created throw error
-    if (!file) {
-        throw new ApiError(500, "Error uploading file");
-    }
-
-    // TODO: Add new file to current folder's files array
-    currentFolder.files.push(file._id);
-    await currentFolder.save({ validateBeforeSave: false }); // DOUBT
-
-    // Remove publicId and fileUrl from file object before sending in response
-    const fileObject = file.toObject();
-    delete fileObject.publicId;
-    delete fileObject.fileUrl;
-
-    // Send file object in response
-    res.status(200).json(new ApiResponse(200, fileObject, "File uploaded")); // TODO: Remove file from response
 });
 
 // DOWNLOAD FILE

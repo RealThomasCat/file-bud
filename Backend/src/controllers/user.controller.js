@@ -112,7 +112,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
         // The session is then ended, and the error is thrown to be handled by the error-handling middleware.
         session.endSession();
-        throw error;
+        throw new ApiError(500, error.message);
     }
 });
 
