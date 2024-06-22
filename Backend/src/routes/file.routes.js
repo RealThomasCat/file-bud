@@ -5,7 +5,10 @@ import {
     fetchFile,
     downloadFile,
 } from "../controllers/file.controller.js";
-import { upload } from "../middlewares/multer.middleware.js";
+import {
+    multerErrorHandler,
+    upload,
+} from "../middlewares/multer.middleware.js";
 
 // Creating a new router
 const router = Router();
@@ -13,7 +16,12 @@ const router = Router();
 // Routes
 // Secured routes
 router.route("/fetch").post(verifyJWT, fetchFile);
-router.route("/upload").post(verifyJWT, upload.single("file"), uploadFile); // TODO: Make secure
+router.route("/upload").post(
+    verifyJWT,
+    upload.single("file"),
+    multerErrorHandler, // REVIEW: Is this necessary?
+    uploadFile
+); // TODO: Make secure
 router.route("/download").post(verifyJWT, downloadFile);
 
 export default router;

@@ -1,18 +1,14 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-// Debugging
-console.log(
-    process.env.CLOUDINARY_CLOUD_NAME,
-    process.env.CLOUDINARY_API_KEY,
-    process.env.CLOUDINARY_API_SECRET
-);
-
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
 
 // UPLOAD FILE TO CLOUDINARY
 const uploadToCloudinary = async (localFilePath) => {
@@ -55,17 +51,31 @@ const downloadFromCloudinary = async (fileURL) => {
     }
 };
 
-// DELETE FILE FROM CLOUDINARY (TODO: TEST)
+// DELETE FILE FROM CLOUDINARY (TODO: TEST) DOUBT: fileURL or public_id?
 const deleteFromCloudinary = async (fileURL) => {
-    try {
-        if (!fileURL) return null;
+    let attempt = 0;
+    while (attempt < MAX_RETRIES) {
+        try {
+            if (!fileURL) return null;
 
-        // Fetch the file from cloudinary
-        const response = await cloudinary.uploader.destroy(fileURL);
+            // Fetch the file from cloudinary
+            const response = await cloudinary.uploader.destroy(fileURL);
 
-        return response;
-    } catch (error) {
-        return null;
+            return response;
+        } catch (error) {
+            attempt++;
+            if (attempt < MAX_RETRIES) {
+                console.error(
+                    `Attempt ${attempt} to delete file failed, retrying...`
+                );
+                await new Promise((resolve) =>
+                    setTimeout(resolve, RETRY_DELAY)
+                );
+            } else {
+                console.error("All attempts to delete the file failed");
+                throw new Error("Failed to delete file from Cloudinary");
+            }
+        }
     }
 };
 

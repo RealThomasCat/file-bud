@@ -76,7 +76,7 @@ const fetchFile = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, downloadedFile, "File found"));
 });
 
-// UPLOAD FILE *** DOUBT *** (TODO: Thumbnail, File deletion from cloudiary)
+// UPLOAD FILE *** DOUBT *** (TODO: Thumbnail has to be configured in cloudinary)
 const uploadFile = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -100,6 +100,11 @@ const uploadFile = asyncHandler(async (req, res) => {
 
         if (!currentFolderId) {
             throw new ApiError(400, "Folder not selected");
+        }
+
+        // Check if user's storage limit is exceeded, if yes throw error
+        if (req.user.storageUsed + req.file.size > req.user.storageLimit) {
+            throw new ApiError(400, "Storage limit exceeded");
         }
 
         const temp = await Folder.findById(currentFolderId);
@@ -224,14 +229,21 @@ const uploadFile = asyncHandler(async (req, res) => {
 
         // Delete file from cloudinary if uploaded before error (TODO: ENSURE DELTION ALWAYS HAPPENS SUCCESSFULLY)
         if (cloudinaryPublicId) {
-            await deleteFromCloudinary(cloudinaryPublicId);
+            try {
+                await deleteFromCloudinary(cloudinaryPublicId);
+            } catch (error) {
+                throw new ApiError(
+                    500,
+                    "Error deleting file, " + error.message
+                );
+            }
         }
 
         throw new ApiError(500, error.message); // Correct???
     }
 });
 
-// DOWNLOAD FILE
+// DOWNLOAD FILE (TODO: Use ApiError in catch block?)
 const downloadFile = asyncHandler(async (req, res) => {
     const { fileId } = req.body;
 
