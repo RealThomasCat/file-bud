@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Container, FileCard } from "../components/index.js";
+import Login from "../components/Login.jsx";
+import { useDispatch, useSelector } from "react-redux";
 
 function Home() {
     const [folder, setFolder] = useState(null);
     const [files, setFiles] = useState([{ _id: 1 }, { _id: 2 }, { _id: 3 }]);
     const [subFolders, setSubFolders] = useState([]);
 
-    useEffect(() => {
-        // Fetch and set user root folder
-        // Set user files
-        // Set user subFolders
-    }, []);
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.user);
 
-    if (folder) {
+    if (!user) {
         return (
             <div className="w-full py-8 mt-4 text-center">
                 <Container>
@@ -21,6 +20,8 @@ function Home() {
                             <h1 className="text-2xl font-bold hover:text-gray-500">
                                 Login to view your files
                             </h1>
+
+                            <Login />
                         </div>
                     </div>
                 </Container>
