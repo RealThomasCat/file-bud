@@ -4,6 +4,7 @@ import {
     uploadFile,
     fetchFile,
     downloadFile,
+    deleteFile
 } from "../controllers/file.controller.js";
 import {
     multerErrorHandler,
@@ -23,5 +24,6 @@ router.route("/upload").post(
     uploadFile
 ); // TODO: Make secure
 router.route("/download").post(verifyJWT, downloadFile);
+router.route("/delete").post(verifyJWT, deleteFile);
 
 export default router;

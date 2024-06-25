@@ -14,7 +14,7 @@ const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 // Define the path to the log file
 const logFilePath = path.join(__dirname, '../../logs/cloudinary_delete_log.txt');
-console.log(logFilePath)
+// console.log(logFilePath)
 
 // FETCH FOLDER
 const fetchFolder = asyncHandler(async (req, res) => {

@@ -4,6 +4,7 @@ import axios from "axios";
 import mongoose from "mongoose";
 import { File } from "../models/file.model.js";
 import { Folder } from "../models/folder.model.js";
+import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -12,6 +13,12 @@ import {
     uploadToCloudinary,
     deleteFromCloudinary,
 } from "../utils/cloudinary.js";
+
+// Get the directory path of the current module using import.meta.url
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+// Define the path to the log file
+const logFilePath = path.join(__dirname, '../../logs/cloudinary_delete_log.txt');
 
 // FETCH FILE
 const fetchFile = asyncHandler(async (req, res) => {
@@ -291,4 +298,63 @@ const downloadFile = asyncHandler(async (req, res) => {
     }
 });
 
-export { fetchFile, uploadFile, downloadFile };
+// DELETE FILE (TODO: Use ApiError in catch block?)
+const deleteFile = asyncHandler(async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { fileId } = req.body;
+        const user = req.user; // Authenticated user information
+
+        // Check whether the file with the given ID exists
+        const fileToDelete = await File.findById(fileId).exec();
+        if (!fileToDelete) {
+            return res.status(404).json({ message: 'File not found' });
+        }
+
+        // Check whether the file belongs to the authenticated user
+        if (fileToDelete.ownerId.toString() !== user._id.toString()) {
+            return res.status(403).json({ message: 'Unauthorized access' });
+        }
+
+        // Decrement storage used by the size of the file to be deleted
+        await User.updateOne(
+            { _id: user._id },
+            { $inc: { storageUsed: -fileToDelete.size } }
+        ).session(session);
+
+        // Delete the file ID from the files array of its parent folder
+        await Folder.updateOne(
+            { _id: fileToDelete.parentFolder },
+            { $pull: { files: fileId } }
+        ).session(session);
+
+        // Extract Cloudinary publicId before deleting the file document
+        const cloudinaryPublicId = fileToDelete.publicId;
+
+        // Delete the file document itself
+        await File.deleteOne({ _id: fileId }).session(session);
+
+        // Commit transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        // Attempt to delete the file from Cloudinary
+        try {
+            await deleteFromCloudinary(cloudinaryPublicId);
+        } catch (error) {
+            // Log the error and retry later
+            fs.appendFileSync(logFilePath, cloudinaryPublicId + '\n');
+        }
+
+        res.status(200).json({ message: 'File deleted successfully' });
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error('Error deleting file:', error);
+        res.status(500).json({ message: 'An error occurred while deleting the file', error: error.message });
+    }
+});
+
+export { fetchFile, uploadFile, downloadFile, deleteFile };
