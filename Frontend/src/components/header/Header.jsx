@@ -1,9 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Container, Logo } from "../index.js";
-import defaultThumbnail from "../../assets/placeholderImage.jpg";
-import SecondaryButton from "../SecondaryButton.jsx";
+import {
+    Container,
+    Logo,
+    PrimaryButton,
+    SecondaryButton,
+    Account,
+    SearchBar,
+} from "../index.js";
 import { useSelector } from "react-redux";
 
 function Header() {
@@ -55,14 +59,13 @@ function Header() {
     return (
         <Container>
             <header className="h-28 py-6">
-                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-gray-500">
-                    {/* Logo */}
-                    <Link
-                        to="/"
-                        className="flex h-full w-fit bg-black rounded-full px-6"
-                    >
+                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass bg-opacity-10 border border-borderCol border-opacity-25">
+                    <div className="flex justify-center items-center gap-3">
+                        {/* Logo */}
                         <Logo />
-                    </Link>
+
+                        {/* TODO: <SearchBar /> */}
+                    </div>
 
                     {/*Nav Links*/}
                     {/* <ul className="flex ml-auto gap-4">
@@ -92,7 +95,7 @@ function Header() {
                         {!user && (
                             <>
                                 {/* Login */}
-                                <SecondaryButton action="Login" />
+                                <PrimaryButton action="Login" />
 
                                 {/* Register */}
                                 <SecondaryButton action="Register" />
@@ -100,13 +103,7 @@ function Header() {
                         )}
 
                         {/* Account Button */}
-                        <button className="h-full aspect-square rounded-full">
-                            <img
-                                className="object-cover rounded-full w-full h-full"
-                                src={defaultThumbnail}
-                                alt="DP"
-                            />
-                        </button>
+                        <Account />
                     </div>
                 </nav>
             </header>

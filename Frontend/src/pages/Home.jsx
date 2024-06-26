@@ -12,7 +12,7 @@ function Home() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.user);
 
-    if (!user) {
+    if (user) {
         return (
             <div className="w-full py-8 mt-4 text-center">
                 <Container>
