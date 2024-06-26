@@ -14,7 +14,7 @@ const Login = () => {
     };
 
     return (
-        <div>
+        <div className="mx-auto max-w-80 flex flex-col gap-2">
             <h2>Login</h2>
             <input
                 type="email"
@@ -28,7 +28,9 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
             />
-            <button onClick={handleLogin}>Login</button>
+            <button className=" bg-white" onClick={handleLogin}>
+                Login
+            </button>
             {userState.status === "loading" && <p>Loading...</p>}
             {userState.error && <p>{userState.error}</p>}
         </div>

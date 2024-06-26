@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, FileCard } from "../components/index.js";
 import Login from "../components/Login.jsx";
 import { useDispatch, useSelector } from "react-redux";
+import MainButton from "../components/MainButton.jsx";
 
 function Home() {
     const [folder, setFolder] = useState(null);
@@ -17,7 +18,7 @@ function Home() {
                 <Container>
                     <div className="flex flex-wrap">
                         <div className="p-2 w-full">
-                            <h1 className="text-2xl font-bold hover:text-gray-500">
+                            <h1 className="text-2xl font-bold text-white">
                                 Login to view your files
                             </h1>
 
@@ -29,37 +30,31 @@ function Home() {
         );
     }
     return (
-        <div className="w-full py-8">
-            <Container>
-                <div className="mb-8 flex justify-between">
-                    <h1 className="text-2xl font-medium">Folder Name</h1>
-                    <div className="flex gap-4">
-                        <button className=" bg-gray-400 p-2 rounded-lg">
-                            Folder Option 1
-                        </button>
-                        <button className=" bg-gray-400 p-2 rounded-lg">
-                            Folder Option 2
-                        </button>
-                        <button className=" bg-gray-400 p-2 rounded-lg">
-                            Folder Option 3
-                        </button>
+        <Container>
+            <div className="h-16 mb-6 py-3 flex justify-between items-center">
+                <h1 className="text-2xl font-medium text-white">Folder Name</h1>
+
+                <div className="w-fit h-full flex gap-4">
+                    <MainButton action="Sort by" />
+                    <MainButton action="Type" />
+                    <MainButton action="?" />
+                </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+                {subFolders.map((subFolder) => (
+                    <div key={subFolder._id}>{/* {Folder Card} */}</div>
+                ))}
+                {files.map((file) => (
+                    <div key={file._id}>
+                        <FileCard
+                            title="Khalistani Billa"
+                            // TODO: thumbnail according to file type
+                        />
                     </div>
-                </div>
-                <div className="flex flex-wrap gap-4">
-                    {subFolders.map((subFolder) => (
-                        <div key={subFolder._id}>{/* {Folder Card} */}</div>
-                    ))}
-                    {files.map((file) => (
-                        <div key={file._id}>
-                            <FileCard
-                                title="Khalistani Billa"
-                                // TODO: thumbnail according to file type
-                            />
-                        </div>
-                    ))}
-                </div>
-            </Container>
-        </div>
+                ))}
+            </div>
+        </Container>
     );
 }
 

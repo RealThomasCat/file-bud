@@ -1,5 +1,4 @@
 import React from "react";
-import placeholderImage from "../assets/placeholderImage.jpg";
 import defaultThumbnail from "../assets/placeholderImage.jpg";
 
 function FileCard({ title = "File Name", thumbnail = defaultThumbnail }) {

@@ -18,7 +18,10 @@ import {
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 // Define the path to the log file
-const logFilePath = path.join(__dirname, '../../logs/cloudinary_delete_log.txt');
+const logFilePath = path.join(
+    __dirname,
+    "../../logs/cloudinary_delete_log.txt"
+);
 
 // FETCH FILE
 const fetchFile = asyncHandler(async (req, res) => {
@@ -177,13 +180,16 @@ const uploadFile = asyncHandler(async (req, res) => {
         console.log("New file local path ", newFilePath); // DEBUGGING
         console.log("New file name ", newFileName); // DEBUGGING
 
+        // Upload file to cloudinary
         const uploadedFile = await uploadToCloudinary(newFilePath);
 
+        // If file is not uploaded to cloudinary throw error
         if (!uploadedFile) {
             throw new ApiError(500, "Error uploading file");
+        } else {
+            // If file uploaded successfully then set cloudinaryPublicId
+            cloudinaryPublicId = uploadedFile.public_id;
         }
-
-        cloudinaryPublicId = uploadedFile.public_id;
 
         // Create new file object in database (Returns array of created files, we need to extract first element)
         const file = await File.create(
@@ -310,12 +316,12 @@ const deleteFile = asyncHandler(async (req, res) => {
         // Check whether the file with the given ID exists
         const fileToDelete = await File.findById(fileId).exec();
         if (!fileToDelete) {
-            return res.status(404).json({ message: 'File not found' });
+            return res.status(404).json({ message: "File not found" });
         }
 
         // Check whether the file belongs to the authenticated user
         if (fileToDelete.ownerId.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: 'Unauthorized access' });
+            return res.status(403).json({ message: "Unauthorized access" });
         }
 
         // Decrement storage used by the size of the file to be deleted
@@ -345,15 +351,18 @@ const deleteFile = asyncHandler(async (req, res) => {
             await deleteFromCloudinary(cloudinaryPublicId);
         } catch (error) {
             // Log the error and retry later
-            fs.appendFileSync(logFilePath, cloudinaryPublicId + '\n');
+            fs.appendFileSync(logFilePath, cloudinaryPublicId + "\n");
         }
 
-        res.status(200).json({ message: 'File deleted successfully' });
+        res.status(200).json({ message: "File deleted successfully" });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
-        console.error('Error deleting file:', error);
-        res.status(500).json({ message: 'An error occurred while deleting the file', error: error.message });
+        console.error("Error deleting file:", error);
+        res.status(500).json({
+            message: "An error occurred while deleting the file",
+            error: error.message,
+        });
     }
 });
 
