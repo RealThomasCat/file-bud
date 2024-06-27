@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, FileCard } from "../components/index.js";
-import Login from "../components/Login.jsx";
+import {
+    Login,
+    Container,
+    FileCard,
+    UploadButton,
+    MainButton,
+    TypeModal,
+} from "../components/index.js";
 import { useDispatch, useSelector } from "react-redux";
-import MainButton from "../components/MainButton.jsx";
 
 function Home() {
     const [folder, setFolder] = useState(null);
@@ -12,16 +17,12 @@ function Home() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.user);
 
-    if (user) {
+    if (!user) {
         return (
             <div className="w-full py-8 mt-4 text-center">
                 <Container>
                     <div className="flex flex-wrap">
                         <div className="p-2 w-full">
-                            <h1 className="text-2xl font-bold text-white">
-                                Login to view your files
-                            </h1>
-
                             <Login />
                         </div>
                     </div>
@@ -35,9 +36,9 @@ function Home() {
                 <h1 className="text-2xl font-medium text-white">Folder Name</h1>
 
                 <div className="w-fit h-full flex gap-4">
-                    <MainButton action="Sort by" />
-                    <MainButton action="Type" />
-                    <MainButton action="?" />
+                    <UploadButton />
+                    <MainButton title="Type" />
+                    {/* <MainButton title="Sort by" /> */}
                 </div>
             </div>
 
@@ -53,6 +54,7 @@ function Home() {
                         />
                     </div>
                 ))}
+                <TypeModal />
             </div>
         </Container>
     );

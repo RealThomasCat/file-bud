@@ -59,7 +59,7 @@ function Header() {
     return (
         <Container>
             <header className="h-28 py-6">
-                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass bg-opacity-10 border border-borderCol border-opacity-25">
+                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass bg-opacity-10 border border-borderCol border-opacity-15">
                     <div className="flex justify-center items-center gap-3">
                         {/* Logo */}
                         <Logo />
@@ -95,15 +95,15 @@ function Header() {
                         {!user && (
                             <>
                                 {/* Login */}
-                                <PrimaryButton action="Login" />
+                                <PrimaryButton title="Login" />
 
                                 {/* Register */}
-                                <SecondaryButton action="Register" />
+                                <SecondaryButton title="Register" />
                             </>
                         )}
 
                         {/* Account Button */}
-                        <Account />
+                        {user && <Account />}
                     </div>
                 </nav>
             </header>

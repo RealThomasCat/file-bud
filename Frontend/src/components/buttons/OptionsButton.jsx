@@ -1,5 +1,5 @@
 import React from "react";
-import OptionsIcon from "../assets/OptionsIcon.svg";
+import OptionsIcon from "../../assets/OptionsIcon.svg";
 
 function OptionsButton() {
     return (
