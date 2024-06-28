@@ -10,8 +10,8 @@ import PrimaryButton from "./buttons/PrimaryButton";
 import SecondaryButton from "./buttons/SecondaryButton";
 import MainButton from "./buttons/MainButton";
 import OptionsButton from "./buttons/OptionsButton";
-import UploadButton from "./buttons/UploadButton";
-import TypeModal from "./TypeModal";
+import Upload from "./Upload";
+import TypeMenu from "./TypeMenu";
 
 export {
     Login,
@@ -26,6 +26,6 @@ export {
     Account,
     SearchBar,
     OptionsButton,
-    UploadButton,
-    TypeModal,
+    Upload,
+    TypeMenu,
 };

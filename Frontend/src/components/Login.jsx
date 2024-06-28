@@ -16,7 +16,7 @@ const Login = () => {
 
     return (
         <div className="mx-auto max-w-96 flex flex-col gap-8">
-            <div className="bg-glass bg-opacity-10 px-4 py-6 rounded-lg flex flex-col gap-6 border border-borderCol border-opacity-10">
+            <div className="w-full bg-glass bg-opacity-10 px-4 py-6 rounded-lg flex flex-col gap-6 border border-borderCol border-opacity-10">
                 <h1 className="text-xl font-light text-white mb-4">
                     Login to view your files
                 </h1>

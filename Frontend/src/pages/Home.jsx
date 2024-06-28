@@ -3,9 +3,8 @@ import {
     Login,
     Container,
     FileCard,
-    UploadButton,
-    MainButton,
-    TypeModal,
+    Upload,
+    TypeMenu,
 } from "../components/index.js";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -17,7 +16,7 @@ function Home() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user.user);
 
-    if (!user) {
+    if (user) {
         return (
             <div className="w-full py-8 mt-4 text-center">
                 <Container>
@@ -36,9 +35,8 @@ function Home() {
                 <h1 className="text-2xl font-medium text-white">Folder Name</h1>
 
                 <div className="w-fit h-full flex gap-4">
-                    <UploadButton />
-                    <MainButton title="Type" />
-                    {/* <MainButton title="Sort by" /> */}
+                    <Upload />
+                    <TypeMenu />
                 </div>
             </div>
 
@@ -54,7 +52,6 @@ function Home() {
                         />
                     </div>
                 ))}
-                <TypeModal />
             </div>
         </Container>
     );
