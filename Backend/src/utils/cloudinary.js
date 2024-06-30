@@ -17,6 +17,7 @@ const uploadToCloudinary = async (localFilePath) => {
         //upload the file on cloudinary
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto",
+            type: 'authenticated'
         });
 
         // file has been uploaded successfully
@@ -79,4 +80,14 @@ const deleteFromCloudinary = async (fileURL) => {
     }
 };
 
-export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary };
+// Provides signed url for authenticated uploads
+const cloudinaryUrlProvider = (publicId, resource_type) => {
+
+    return cloudinary.url(publicId, {
+        type: "authenticated",
+        resource_type: resource_type,
+        sign_url: true,
+    });
+};
+
+export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary, cloudinaryUrlProvider };

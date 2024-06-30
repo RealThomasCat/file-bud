@@ -12,6 +12,7 @@ import { downloadFromCloudinary } from "../utils/cloudinary.js";
 import {
     uploadToCloudinary,
     deleteFromCloudinary,
+    cloudinaryUrlProvider
 } from "../utils/cloudinary.js";
 
 // Get the directory path of the current module using import.meta.url
@@ -113,13 +114,13 @@ const uploadFile = asyncHandler(async (req, res) => {
         }
 
         // Check if user's storage limit is exceeded, if yes throw error
-        if (req.user.storageUsed + req.file.size > req.user.storageLimit) {
+        if (req.user.storageUsed + req.file.size > req.user.maxStorage) {
             throw new ApiError(400, "Storage limit exceeded");
         }
 
         const temp = await Folder.findById(currentFolderId);
 
-        console.log("Current folder before populate:", temp); // DEBUGGING
+        // console.log("Current folder before populate:", temp); // DEBUGGING
 
         // Check if file with same name already exists in current folder
         // Fetch current folder
@@ -127,7 +128,7 @@ const uploadFile = asyncHandler(async (req, res) => {
             .populate("files")
             .session(session);
 
-        console.log("Current folder after populate:", currentFolder); // DEBUGGING
+        // console.log("Current folder after populate:", currentFolder); // DEBUGGING
 
         // If currentFolder does not exist then throw error
         if (!currentFolder) {
@@ -196,8 +197,6 @@ const uploadFile = asyncHandler(async (req, res) => {
             [
                 {
                     title: newFileName,
-                    fileUrl: uploadedFile.url,
-                    thumbnail: uploadedFile?.thumbnail_url, // Thubnail url has to be configured in cloudinary
                     size: uploadedFile.bytes,
                     duration: uploadedFile?.duration,
                     ownerId: req.user._id,
@@ -214,7 +213,7 @@ const uploadFile = asyncHandler(async (req, res) => {
         currentFolder.files.push(file[0]._id);
         await currentFolder.save({ session, validateBeforeSave: false }); // DOUBT
 
-        console.log("Current folder after pushing:", currentFolder); // DEBUGGING
+        // console.log("Current folder after pushing:", currentFolder); // DEBUGGING
 
         // Update user's storage used
         const user = req.user;
@@ -227,10 +226,9 @@ const uploadFile = asyncHandler(async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        // Remove publicId and fileUrl from file object before sending in response
+        // Remove publicId from file object before sending in response
         const createdFile = file[0].toObject();
         delete createdFile.publicId;
-        delete createdFile.fileUrl;
 
         // Send file object in response
         return res
@@ -274,9 +272,13 @@ const downloadFile = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized access");
     }
 
+
+    const signed_url = cloudinaryUrlProvider(requestedFile.publicId, requestedFile.resourceType);
+    // console.log("signed url", signed_url) //DEBUGGING
+
     try {
         const response = await axios({
-            url: requestedFile.fileUrl,
+            url: signed_url,
             method: "GET",
             responseType: "stream",
         });

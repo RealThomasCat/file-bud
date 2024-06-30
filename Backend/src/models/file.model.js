@@ -4,16 +4,9 @@ import mongoose, { Schema } from "mongoose";
 
 const fileSchema = new Schema(
     {
-        fileUrl: {
-            type: String, // Cloudinary URL
-            // required: true,
-        },
         publicId: {
             type: String, // Cloudinary public ID
             required: true,
-        },
-        thumbnail: {
-            type: String, // Cloudinary URL
         },
         title: {
             type: String,
