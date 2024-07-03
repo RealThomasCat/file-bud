@@ -1,4 +1,3 @@
-// src/store/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userService from "../services/user.service";
 
@@ -32,6 +31,10 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk("user/logout", async () => {
     await userService.logout();
+});
+
+export const getUser = createAsyncThunk("user/getUser", async () => {
+    await userService.getUser();
 });
 
 const userSlice = createSlice({
@@ -69,6 +72,13 @@ const userSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(logoutUser.fulfilled, (state) => {
+                state.user = null;
+            })
+            .addCase(getUser.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            .addCase(getUser.fulfilled, (state) => {
                 state.user = null;
             });
     },

@@ -20,11 +20,7 @@ function Home() {
         return (
             <div className="w-full py-8 mt-4 text-center">
                 <Container>
-                    <div className="flex flex-wrap">
-                        <div className="p-2 w-full">
-                            <Login />
-                        </div>
-                    </div>
+                    <h1 className="text-white">Loading...</h1>
                 </Container>
             </div>
         );

@@ -21,8 +21,13 @@ const logout = () => {
     return axios.post(`${API_URL}/logout`);
 };
 
+const getUser = () => {
+    return axios.get(`${API_URL}/getUser`);
+};
+
 export default {
     register,
     login,
     logout,
+    getUser,
 };

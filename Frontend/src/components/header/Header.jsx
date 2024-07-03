@@ -7,6 +7,7 @@ import {
     SecondaryButton,
     Account,
     SearchBar,
+    Login,
 } from "../index.js";
 import { useSelector } from "react-redux";
 
@@ -95,7 +96,7 @@ function Header() {
                         {!user && (
                             <>
                                 {/* Login */}
-                                <PrimaryButton title="Login" />
+                                <Login />
 
                                 {/* Register */}
                                 <SecondaryButton title="Register" />
