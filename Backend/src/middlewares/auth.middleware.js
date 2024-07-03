@@ -5,7 +5,6 @@ import { User } from "../models/user.model.js";
 
 // Method to verify JWT token then find and inject authenticated user to req object
 export const verifyJWT = asyncHandler(async (req, res, next) => {
-    // DOUBT: Why do we need to use try-catch block here? If we already used asyncHandler?
     try {
         // Get access token from cookies or header (Header Format-> "Authorization: Bearer <token>")
         const token =
@@ -25,16 +24,22 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         // Using user id from decoded token, find user from DB
         const user = await User.findById(decodedToken?._id).select(
             "-password -refreshToken"
-        );
+        ).catch(() => {
+            throw new ApiError(500, "Failed to fetch user data");
+        });
 
-        // If user doesn't exist then throw error
+        // Check if user exists
         if (!user) {
             throw new ApiError(401, "Invalid access token");
         }
 
         req.user = user; // Middleware adds user to req object
         next(); // Move to next (Like logout, delete user, etc.)
+
     } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token");
+        // Handle errors by throwing a new ApiError
+        console.log(error)
+        throw new ApiError(401, error?.message || "Something went wrong!");
     }
 });
+
