@@ -7,6 +7,8 @@ import { Provider } from "react-redux";
 import store from "./store/store.js";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import Home from "./pages/Home.jsx";
+import { AuthLayout } from "./components/index.js";
+import LandingPage from "./pages/LandingPage.jsx";
 
 const router = createBrowserRouter([
     {
@@ -16,7 +18,15 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <Home />,
+                element: <LandingPage />,
+            },
+            {
+                path: "/home",
+                element: (
+                    <AuthLayout authentication={false}>
+                        <Home />
+                    </AuthLayout>
+                ),
             },
         ],
     },

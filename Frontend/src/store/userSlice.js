@@ -1,60 +1,77 @@
+// src/store/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import * as userService from "../services/user.service.js";
+import userService from "../services/user.service";
 
-// DOUBT: What should be the first argument of createAsyncThunk?
-export const loginUser = createAsyncThunk("???", async (userData) => {
-    const response = await userService.login(userData);
-    console.log(response);
-    return response;
+export const registerUser = createAsyncThunk(
+    "user/register",
+    async ({ username, email, password }, thunkAPI) => {
+        try {
+            const response = await userService.register(
+                username,
+                email,
+                password
+            );
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const loginUser = createAsyncThunk(
+    "user/login",
+    async ({ email, password }, thunkAPI) => {
+        try {
+            const response = await userService.login(email, password);
+            return response.data;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const logoutUser = createAsyncThunk("user/logout", async () => {
+    await userService.logout();
 });
 
-// Initial state
-const initialState = {
-    status: false, // User is not authenticated by default
-    userData: null, // No user data by default
-    error: null, // No error by default
-};
-
-// To track the authentication state of the user, we can create a slice called userSlice.
 const userSlice = createSlice({
     name: "user",
-    initialState,
-    reducers: {
-        // Logout action
-        logout: (state) => {
-            state.status = false; // Set the status to false
-            state.userData = null; // Clear the user data
-        },
+    initialState: {
+        user: null,
+        isLoading: false,
+        error: null,
     },
+    reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(registerUser.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(registerUser.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.user = action.payload;
+            })
+            .addCase(registerUser.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
             .addCase(loginUser.pending, (state) => {
-                state.status = "loading";
+                state.isLoading = true;
+                state.error = null;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
+                state.isLoading = false;
                 state.user = action.payload;
-                state.status = "succeeded";
             })
             .addCase(loginUser.rejected, (state, action) => {
-                state.error = action.error.message;
-                state.status = "failed";
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            .addCase(logoutUser.fulfilled, (state) => {
+                state.user = null;
             });
-        // .addCase(registerUser.pending, (state) => {
-        //     state.status = "loading";
-        // })
-        // .addCase(registerUser.fulfilled, (state, action) => {
-        //     state.user = action.payload;
-        //     state.status = "succeeded";
-        // })
-        // .addCase(registerUser.rejected, (state, action) => {
-        //     state.error = action.error.message;
-        //     state.status = "failed";
-        // });
     },
 });
 
-// Export the actions
-export const { login, logout } = userSlice.actions;
-
-// Export the reducer
 export default userSlice.reducer;

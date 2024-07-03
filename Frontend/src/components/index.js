@@ -12,6 +12,7 @@ import MainButton from "./buttons/MainButton";
 import OptionsButton from "./buttons/OptionsButton";
 import Upload from "./Upload";
 import TypeMenu from "./TypeMenu";
+import AuthLayout from "./AuthLayout";
 
 export {
     Login,
@@ -28,4 +29,5 @@ export {
     OptionsButton,
     Upload,
     TypeMenu,
+    AuthLayout,
 };
