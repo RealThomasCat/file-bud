@@ -182,7 +182,7 @@ const uploadFile = asyncHandler(async (req, res) => {
         console.log("New file name ", newFileName); // DEBUGGING
 
         // Upload file to cloudinary
-        const uploadedFile = await uploadToCloudinary(newFilePath);
+        const uploadedFile = await uploadToCloudinary(newFilePath, req.file.mimetype);
 
         // If file is not uploaded to cloudinary throw error
         if (!uploadedFile) {
@@ -226,9 +226,7 @@ const uploadFile = asyncHandler(async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        // Remove publicId from file object before sending in response
         const createdFile = file[0].toObject();
-        delete createdFile.publicId;
 
         // Send file object in response
         return res

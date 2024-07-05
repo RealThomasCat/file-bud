@@ -11,14 +11,23 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 
 // UPLOAD FILE TO CLOUDINARY
-const uploadToCloudinary = async (localFilePath) => {
+const uploadToCloudinary = async (localFilePath, mimeType) => {
     try {
         if (!localFilePath) return null;
-        //upload the file on cloudinary
-        const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
-            type: 'authenticated'
-        });
+
+        const response = mimeType.startsWith("video")
+            ? await cloudinary.uploader.upload(localFilePath, {
+                resource_type: 'video',
+                type: 'authenticated',
+                eager: [
+                    { streaming_profile: 'hd', format: 'm3u8' }
+                ],
+                eager_async: true
+            })
+            : await cloudinary.uploader.upload(localFilePath, {
+                resource_type: "auto",
+                type: 'authenticated'
+            });
 
         // file has been uploaded successfully
         fs.unlinkSync(localFilePath);
@@ -29,6 +38,7 @@ const uploadToCloudinary = async (localFilePath) => {
         return null;
     }
 };
+
 
 // DOWNLOAD FILE FROM CLOUDINARY TO LOCAL STORAGE (TODO: TEST)
 const downloadFromCloudinary = async (fileURL) => {
