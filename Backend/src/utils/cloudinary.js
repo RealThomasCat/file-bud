@@ -100,4 +100,16 @@ const cloudinaryUrlProvider = (publicId, resource_type) => {
     });
 };
 
-export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary, cloudinaryUrlProvider };
+// Provides signed url for authenticated uploads
+const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
+    const options = {
+        type: 'authenticated', // Use 'authenticated' type for private videos
+        resource_type: resource_type,
+        expires_at: Math.floor(Date.now() / 1000) + 3600, // URL expires in 1hr
+        attachment: true // Indicate that the content should be downloaded
+    };
+
+    return cloudinary.utils.private_download_url(publicId, format, options);
+};
+
+export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary, cloudinaryUrlProvider, cloudinaryPrivateDownloadUrl };

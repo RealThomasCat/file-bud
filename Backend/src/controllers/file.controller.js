@@ -12,7 +12,8 @@ import { downloadFromCloudinary } from "../utils/cloudinary.js";
 import {
     uploadToCloudinary,
     deleteFromCloudinary,
-    cloudinaryUrlProvider
+    cloudinaryUrlProvider,
+    cloudinaryPrivateDownloadUrl
 } from "../utils/cloudinary.js";
 
 // Get the directory path of the current module using import.meta.url
@@ -271,37 +272,11 @@ const downloadFile = asyncHandler(async (req, res) => {
     }
 
 
-    const signed_url = cloudinaryUrlProvider(requestedFile.publicId, requestedFile.resourceType);
-    // console.log("signed url", signed_url) //DEBUGGING
+    const signed_url = cloudinaryPrivateDownloadUrl(requestedFile.publicId, requestedFile.resourceType, requestedFile.format);
+    console.log("signed url", signed_url) //DEBUGGING
 
-    try {
-        const response = await axios({
-            url: signed_url,
-            method: "GET",
-            responseType: "stream",
-        });
+    res.redirect(signed_url);
 
-        // Set the appropriate headers
-        const File_mimeType =
-            requestedFile.resourceType + "/" + requestedFile.format;
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${requestedFile.title}"`
-        );
-        res.setHeader("Content-Type", File_mimeType);
-
-        // Log headers for debugging (optional)
-        console.log(
-            `Content-Disposition: attachment; filename="${requestedFile.title}"`
-        );
-        console.log(`Content-Type: ${File_mimeType}`);
-
-        // Pipe the response data to the client
-        response.data.pipe(res);
-    } catch (error) {
-        console.error("Error downloading file:", error);
-        res.status(500).send("Error downloading file");
-    }
 });
 
 // DELETE FILE (TODO: Use ApiError in catch block?)
