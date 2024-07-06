@@ -92,7 +92,6 @@ const fetchFile = asyncHandler(async (req, res) => {
 // UPLOAD FILE *** DOUBT *** (TODO: Thumbnail has to be configured in cloudinary)
 const uploadFile = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
 
     // To keep track if file is uploaded to cloudinary
     let cloudinaryPublicId = null;
@@ -127,8 +126,7 @@ const uploadFile = asyncHandler(async (req, res) => {
         // Check if file with same name already exists in current folder
         // Fetch current folder
         const currentFolder = await Folder.findById(currentFolderId)
-            .populate("files")
-            .session(session);
+            .populate("files");
 
         // console.log("Current folder after populate:", currentFolder); // DEBUGGING
 
@@ -193,6 +191,10 @@ const uploadFile = asyncHandler(async (req, res) => {
             // If file uploaded successfully then set cloudinaryPublicId
             cloudinaryPublicId = uploadedFile.public_id;
         }
+
+        // Start transaction after uploading the video because mongoDB allwos only a short span
+        // between start and end of a trasaction
+        session.startTransaction();
 
         // Create new file object in database (Returns array of created files, we need to extract first element)
         const file = await File.create(
