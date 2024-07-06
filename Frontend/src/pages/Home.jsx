@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    Login,
-    Container,
-    FileCard,
-    Upload,
-    TypeMenu,
-} from "../components/index.js";
+import { Container, FileCard, Upload, TypeMenu } from "../components/index.js";
 import { useDispatch, useSelector } from "react-redux";
 
 function Home() {
@@ -13,7 +7,6 @@ function Home() {
     const [files, setFiles] = useState([{ _id: 1 }, { _id: 2 }, { _id: 3 }]);
     const [subFolders, setSubFolders] = useState([]);
 
-    const dispatch = useDispatch();
     const user = useSelector((state) => state.user.user);
 
     if (!user) {

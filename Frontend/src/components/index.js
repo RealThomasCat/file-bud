@@ -1,4 +1,3 @@
-import Login from "./Login";
 import Container from "./container/Container";
 import Account from "./header/Account";
 import Header from "./header/Header";
@@ -15,7 +14,6 @@ import TypeMenu from "./TypeMenu";
 import AuthLayout from "./AuthLayout";
 
 export {
-    Login,
     Header,
     Container,
     Logo,

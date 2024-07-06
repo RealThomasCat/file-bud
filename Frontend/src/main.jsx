@@ -5,10 +5,8 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store/store.js";
-import ErrorPage from "./pages/ErrorPage.jsx";
-import Home from "./pages/Home.jsx";
 import { AuthLayout } from "./components/index.js";
-import LandingPage from "./pages/LandingPage.jsx";
+import { Login, LandingPage, Home, ErrorPage } from "./pages/index.js";
 
 const router = createBrowserRouter([
     {
@@ -21,11 +19,15 @@ const router = createBrowserRouter([
                 element: <LandingPage />,
             },
             {
+                path: "/login",
+                element: <Login />,
+            },
+            {
                 path: "/home",
                 element: (
-                    <AuthLayout authentication={false}>
-                        <Home />
-                    </AuthLayout>
+                    // <AuthLayout authentication={false}>
+                    <Home />
+                    // </AuthLayout>
                 ),
             },
         ],
