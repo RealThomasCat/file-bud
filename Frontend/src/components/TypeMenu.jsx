@@ -7,8 +7,11 @@ import VideoIcon from "../assets/VideoIcon.svg";
 function TypeMenu() {
     return (
         <Menu>
-            <MenuButton>
-                <MainButton title="Type" />
+            <MenuButton
+                className="h-full w-28 rounded-full bg-glass bg-opacity-10
+                border border-borderCol border-opacity-15 text-textCol pb-1 "
+            >
+                Type
             </MenuButton>
 
             <MenuItems
