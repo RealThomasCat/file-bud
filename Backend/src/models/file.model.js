@@ -35,7 +35,7 @@ const fileSchema = new Schema(
         },
         format: {
             type: String,
-            required: true,
+            // required: true,
         },
         resourceType: {
             type: String,

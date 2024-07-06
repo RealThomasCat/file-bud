@@ -100,7 +100,7 @@ const cloudinaryUrlProvider = (publicId, resource_type) => {
     });
 };
 
-// Provides signed url for authenticated uploads
+// Provides TIME LIMITED signed url for authenticated uploads
 const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
     const options = {
         type: 'authenticated', // Use 'authenticated' type for private videos
@@ -112,4 +112,28 @@ const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
     return cloudinary.utils.private_download_url(publicId, format, options);
 };
 
-export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary, cloudinaryUrlProvider, cloudinaryPrivateDownloadUrl };
+// Provides signed url for thumnail of authenticated uploads
+const cloudinaryThumbnailUrl = (publicId, resource_type, format) => {
+    let thumbnailUrl = null;
+    if (resource_type === 'image' || resource_type === 'video') {
+        const transformations = [{ width: 300, height: 300, crop: 'scale' }];
+
+        if (resource_type === 'video') {
+            transformations.push({ fetch_format: 'jpg' }, { start_offset: 'auto' });
+        } else if (resource_type === 'image' && format === 'pdf') {
+            transformations.push({ page: 1, fetch_format: 'jpg' });
+        }
+
+        thumbnailUrl = cloudinary.url(publicId, {
+            resource_type: resource_type,
+            type: 'authenticated',
+            sign_url: true,
+            transformation: transformations,
+            format: 'jpg' // Ensure the output is in JPG format for videos and PDFs
+        });
+    }
+
+    return thumbnailUrl;
+};
+
+export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary, cloudinaryUrlProvider, cloudinaryPrivateDownloadUrl, cloudinaryThumbnailUrl };

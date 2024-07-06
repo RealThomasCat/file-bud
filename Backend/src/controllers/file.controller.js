@@ -13,7 +13,8 @@ import {
     uploadToCloudinary,
     deleteFromCloudinary,
     cloudinaryUrlProvider,
-    cloudinaryPrivateDownloadUrl
+    cloudinaryPrivateDownloadUrl,
+    cloudinaryThumbnailUrl
 } from "../utils/cloudinary.js";
 
 // Get the directory path of the current module using import.meta.url
@@ -203,14 +204,14 @@ const uploadFile = asyncHandler(async (req, res) => {
                     ownerId: req.user._id,
                     parentFolder: currentFolder._id,
                     publicId: uploadedFile.public_id,
-                    format: uploadedFile.format,
+                    format: uploadedFile?.format,
                     resourceType: uploadedFile.resource_type,
                 },
             ],
             { session }
         );
 
-        // ***** DOUBT ***** (Populated cuurentFolder contains file objects, not file ids, but still eveything is working fine, check if it is correct or not)
+        // ***** DOUBT ***** (Populated currentFolder contains file objects, not file ids, but still eveything is working fine, check if it is correct or not)
         currentFolder.files.push(file[0]._id);
         await currentFolder.save({ session, validateBeforeSave: false }); // DOUBT
 
@@ -341,4 +342,35 @@ const deleteFile = asyncHandler(async (req, res) => {
     }
 });
 
-export { fetchFile, uploadFile, downloadFile, deleteFile };
+// GET FILE THUMBNAIL (TODO: Use ApiError in catch block?)
+const fileThumbnail = asyncHandler(async (req, res) => {
+    const { fileId } = req.body;
+
+    const requestedFile = await File.findById(fileId);
+    // console.log(_id);
+    console.log(requestedFile);
+
+    // If user exists then throw error
+    if (!requestedFile) {
+        throw new ApiError(409, "File does not Exist");
+    }
+
+    // Check if requested file belongs to user, if not throw error
+    if (requestedFile.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
+    // Check if requested file is image or video
+    if (requestedFile.resourceType !== 'video' && requestedFile.resourceType !== 'image') {
+        throw new ApiError(403, "Thumbnail not supported for this file");
+    }
+
+
+    const signed_url = cloudinaryThumbnailUrl(requestedFile.publicId, requestedFile.resourceType, requestedFile.format);
+    console.log("signed url", signed_url) //DEBUGGING
+
+    res.redirect(signed_url);
+
+});
+
+export { fetchFile, uploadFile, downloadFile, deleteFile, fileThumbnail };
