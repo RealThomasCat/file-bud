@@ -292,33 +292,41 @@ const deleteFile = asyncHandler(async (req, res) => {
         const user = req.user; // Authenticated user information
 
         // Check whether the file with the given ID exists
-        const fileToDelete = await File.findById(fileId).exec();
+        const fileToDelete = await File.findById(fileId).exec().catch((err) => {
+            throw new ApiError(500, "Error finding the file");
+        });
         if (!fileToDelete) {
-            return res.status(404).json({ message: "File not found" });
+            throw new ApiError(404, "File not found");
         }
 
         // Check whether the file belongs to the authenticated user
         if (fileToDelete.ownerId.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: "Unauthorized access" });
+            throw new ApiError(403, "Unauthorized access");
         }
 
         // Decrement storage used by the size of the file to be deleted
         await User.updateOne(
             { _id: user._id },
             { $inc: { storageUsed: -fileToDelete.size } }
-        ).session(session);
+        ).session(session).catch((err) => {
+            throw new ApiError(500, "Error updating user storage");
+        });
 
         // Delete the file ID from the files array of its parent folder
         await Folder.updateOne(
             { _id: fileToDelete.parentFolder },
             { $pull: { files: fileId } }
-        ).session(session);
+        ).session(session).catch((err) => {
+            throw new ApiError(500, "Error updating parent folder");
+        });
 
         // Extract Cloudinary publicId before deleting the file document
         const cloudinaryPublicId = fileToDelete.publicId;
 
         // Delete the file document itself
-        await File.deleteOne({ _id: fileId }).session(session);
+        await File.deleteOne({ _id: fileId }).session(session).catch((err) => {
+            throw new ApiError(500, "Error deleting the file");
+        });
 
         // Commit transaction
         await session.commitTransaction();
@@ -332,17 +340,15 @@ const deleteFile = asyncHandler(async (req, res) => {
             fs.appendFileSync(logFilePath, cloudinaryPublicId + "\n");
         }
 
-        res.status(200).json({ message: "File deleted successfully" });
+        res.status(200).json(new ApiResponse(200, null, "File deleted successfully"));
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
         console.error("Error deleting file:", error);
-        res.status(500).json({
-            message: "An error occurred while deleting the file",
-            error: error.message,
-        });
+        throw new ApiError(error.statusCode || 500, error.message || "An error occurred while deleting the file");
     }
 });
+
 
 // GET FILE THUMBNAIL (TODO: Use ApiError in catch block?)
 const fileThumbnail = asyncHandler(async (req, res) => {
