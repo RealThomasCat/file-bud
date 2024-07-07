@@ -346,7 +346,7 @@ const deleteFile = asyncHandler(async (req, res) => {
 
 // GET FILE THUMBNAIL (TODO: Use ApiError in catch block?)
 const fileThumbnail = asyncHandler(async (req, res) => {
-    const { fileId } = req.body;
+    const fileId = req.params.id;
 
     const requestedFile = await File.findById(fileId);
     // console.log(_id);

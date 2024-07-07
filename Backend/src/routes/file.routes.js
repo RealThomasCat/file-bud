@@ -26,6 +26,6 @@ router.route("/upload").post(
 ); // TODO: Make secure
 router.route("/download").post(verifyJWT, downloadFile);
 router.route("/delete").post(verifyJWT, deleteFile);
-router.route("/thumbnail").post(verifyJWT, fileThumbnail);
+router.route("/thumbnail/:id").get(verifyJWT, fileThumbnail);
 
 export default router;
