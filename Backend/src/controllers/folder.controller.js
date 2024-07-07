@@ -19,10 +19,13 @@ const logFilePath = path.join(__dirname, '../../logs/cloudinary_delete_log.txt')
 // FETCH FOLDER
 const fetchFolder = asyncHandler(async (req, res) => {
     // Get folder id from req
-    const { folderId } = req.params;
+    const folderId = req.params.id;
 
     // Find folder using folderId
-    const folder = await Folder.findById(folderId);
+    const folder = await Folder.findById(folderId)
+        .populate('files')
+        .populate('subfolders')
+        .exec();;
 
     // If folder does not exist then throw error
     if (!folder) {
