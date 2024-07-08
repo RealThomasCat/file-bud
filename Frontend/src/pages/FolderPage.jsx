@@ -7,27 +7,24 @@ import {
     FolderCard,
 } from "../components/index.js";
 import { useDispatch, useSelector } from "react-redux";
-// import { fetchFolder } from "../store/folderSlice.js";
 import folderService from "../services/folder.service.js";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
-function Home() {
-    const dispatch = useDispatch();
+function FolderPage() {
     const [folder, setFolder] = useState(null);
     const [error, setError] = useState(null);
     const [files, setFiles] = useState([]);
     const [subFolders, setSubFolders] = useState([]);
 
-    const authStatus = useSelector((state) => state.user.user);
-    const rootFolderId = useSelector((state) => state.user.rootFolderId);
+    const folderId = useParams();
 
     // TODO: FETCH THUMBNAILS
 
     useEffect(() => {
         const fetchFolder = async () => {
             try {
-                const response = await folderService.fetchFolder(rootFolderId);
-                setFolder(response.data.data);
+                const response = await folderService.fetchFolder(folderId);
+                setFolder(response.data);
                 setFiles(response.data.data.files);
                 setSubFolders(response.data.data.subFolders);
             } catch (error) {
@@ -39,20 +36,6 @@ function Home() {
         fetchFolder();
     }, []);
 
-    // useEffect(() => {
-    //     console.log(rootFolderId);
-
-    //     if (rootFolderId) {
-    //         dispatch(fetchFolder(rootFolderId))
-    //             .unwrap() // Returns the actual payload from the promise
-    //             .then((response) => {
-    //                 setFiles(response.data.files);
-    //                 setSubFolders(response.data.subFolders);
-    //             });
-    //     }
-    // }, [dispatch, rootFolderId]);
-
-    // TODO: !(authStatus && folder)
     if (!folder) {
         return (
             <div className="w-full py-8 mt-4 text-center">
@@ -70,8 +53,7 @@ function Home() {
         <Container>
             <div className="h-16 py-3 flex justify-between items-center">
                 <h1 className="text-2xl font-medium text-white">
-                    Folder Name:{" "}
-                    {folder.title === "Root" ? "My Drive" : folder.title}
+                    Folder Name: {folder.title ? folder.title : "Untitled"}
                 </h1>
 
                 <div className="w-fit h-full flex gap-4">
@@ -122,4 +104,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default FolderPage;

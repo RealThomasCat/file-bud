@@ -6,8 +6,14 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store/store.js";
 import { AuthLayout } from "./components/index.js";
-import { Login, LandingPage, Home, ErrorPage } from "./pages/index.js";
-import Register from "./pages/Register.jsx";
+import {
+    Login,
+    LandingPage,
+    Home,
+    ErrorPage,
+    FolderPage,
+    Register,
+} from "./pages/index.js";
 
 const router = createBrowserRouter([
     {
@@ -40,6 +46,14 @@ const router = createBrowserRouter([
                 element: (
                     <AuthLayout authentication={true}>
                         <Home />
+                    </AuthLayout>
+                ),
+            },
+            {
+                path: "/folders/:folderId",
+                element: (
+                    <AuthLayout authentication={true}>
+                        <FolderPage />
                     </AuthLayout>
                 ),
             },
