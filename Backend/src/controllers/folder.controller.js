@@ -22,13 +22,13 @@ const logFilePath = path.join(
 // FETCH FOLDER
 const fetchFolder = asyncHandler(async (req, res) => {
     // Get folder id from req
-    const folderId = req.params.id;
+    const folderId = req.params.folderId;
 
     // Find folder using folderId
     const folder = await Folder.findById(folderId)
-        .populate('files')
-        .populate('subfolders')
-        .exec();;
+        .populate("files")
+        .populate("subfolders")
+        .exec();
 
     // If folder does not exist then throw error
     if (!folder) {

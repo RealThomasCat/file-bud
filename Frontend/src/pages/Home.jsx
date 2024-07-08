@@ -48,13 +48,11 @@ function Home() {
             </div>
 
             <div className="flex flex-wrap gap-4">
-                {subFolders?.map((subFolder) => (
-                    <div key={subFolder._id}>{/* {Folder Card} */}</div>
-                ))}
                 {files?.map((file) => (
-                    <div key={file}>
+                    <div key={file._id}>
                         <FileCard
-                            title={file} // TODO: show file details after populating the file object
+                            title={file.title} // TODO: show file details after populating the file object
+                            thumbnail={file.thumbnail}
                             // TODO: thumbnail according to file type
                         />
                     </div>
