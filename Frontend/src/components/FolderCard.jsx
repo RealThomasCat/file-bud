@@ -1,22 +1,24 @@
 import React from "react";
-import defaultThumbnail from "../assets/placeholderImage.jpg";
+import folderIcon from "../assets/FolderIcon.svg";
+import { OptionsButton } from "./index.js";
 
-function FileCard({ title = "File Name", thumbnail = defaultThumbnail }) {
+function FolderCard({ title = "File Name" }) {
     return (
-        <div className="max-w-40 max-h-40 aspect-square flex flex-col gap-2 bg-gray-400 p-2 rounded-lg">
-            <div className="flex justify-between items-center">
-                <h1>{title}</h1>
-                <button>...</button>
+        <div className="h-fit text-textCol flex justify-between items-center gap-3 bg-glass bg-opacity-10 border border-borderCol border-opacity-15 px-3 py-2 rounded-lg overflow-hidden">
+            <div className="w-full h-full flex items-center gap-2 overflow-hidden">
+                <div className="w-6 h-6 aspect-square rounded-lg">
+                    <img
+                        src={folderIcon}
+                        alt="Khalistani Billa"
+                        className="w-full h-full object-cover rounded"
+                    />
+                </div>
+                <h1 className="w-full text-ellipsis line-clamp-1">{title}</h1>
             </div>
-            <div className="w-full aspect-auto rounded-lg">
-                <img
-                    src={thumbnail}
-                    alt="Khalistani Billa"
-                    className="w-full h-full object-cover rounded"
-                />
-            </div>
+
+            <OptionsButton />
         </div>
     );
 }
 
-export default FileCard;
+export default FolderCard;

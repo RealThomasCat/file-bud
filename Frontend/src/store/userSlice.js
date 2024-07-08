@@ -10,7 +10,7 @@ export const registerUser = createAsyncThunk(
                 email,
                 password
             );
-            console.log(response.data); // Check what to return
+            console.log(response.data); // DEBUGGING
             return response.data;
         } catch (error) {
             console.log(error);
@@ -36,8 +36,14 @@ export const logoutUser = createAsyncThunk("user/logout", async () => {
     await userService.logout();
 });
 
-export const getUser = createAsyncThunk("user/getUser", async () => {
-    await userService.getUser();
+export const getUser = createAsyncThunk("user/getUser", async (_, thunkAPI) => {
+    try {
+        const response = await userService.getUser();
+        // console.log(response.data); // DEBUGGING
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
+    }
 });
 
 const userSlice = createSlice({
@@ -80,12 +86,18 @@ const userSlice = createSlice({
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
             })
+            .addCase(getUser.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getUser.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.user = action.payload;
+                state.rootFolderId = action.payload.data.rootFolder;
+            })
             .addCase(getUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload;
-            })
-            .addCase(getUser.fulfilled, (state) => {
-                state.user = null;
             });
     },
 });

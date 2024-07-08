@@ -2,15 +2,17 @@ import "./App.css";
 import React, { useState, useEffect } from "react";
 import { Header } from "./components";
 import { Outlet } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getUser } from "./store/userSlice";
 
 function App() {
     const [loading, setLoading] = useState(true);
 
-    // useEffect(() => {
-    //     TODO: Fetch the current user data from the server
-    //         })
-    //         .finally(() => setLoading(false));
-    // }, []);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getUser());
+    }, [dispatch]);
 
     return loading ? ( // TODO: !loading
         <div className="min-h-screen flex flex-wrap content-between bg-[#030015]">

@@ -5,11 +5,10 @@ import folderService from "../services/folder.service.js";
 export const fetchFolder = createAsyncThunk(
     "folder/fetchFolder",
     async (folderId, thunkAPI) => {
-        console.log("Hello from fetchFolder");
+        // console.log("Hello from fetchFolder"); // DEBUGGING
         try {
             const response = await folderService.fetchFolder(folderId);
-            console.log("Hello from fetchFolder 2");
-            console.log(response.data);
+            // console.log(response.data); // DEBUGGING
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.message);

@@ -10,8 +10,9 @@ function FileCard({
     type = "image",
 }) {
     return (
-        <div className="max-w-44 max-h-44 aspect-square text-textCol flex flex-col gap-3 bg-glass bg-opacity-10 border border-borderCol border-opacity-15 p-2 rounded-lg overflow-hidden">
-            <div className="flex justify-between items-center px-1 py-0.5">
+        // max-w-44 max-h-44
+        <button className="aspect-square text-textCol flex flex-col gap-3 bg-glass bg-opacity-10 border border-borderCol border-opacity-15 p-2 rounded-lg overflow-hidden">
+            <div className="w-full flex justify-between items-center px-1 py-0.5">
                 <div className="w-full h-full flex items-center gap-2 overflow-hidden">
                     <div className="h-4 min-w-4">
                         <img
@@ -41,7 +42,7 @@ function FileCard({
                     className="w-full h-full object-cover rounded-sm"
                 />
             </div>
-        </div>
+        </button>
     );
 }
 

@@ -225,24 +225,6 @@ const loginUser = asyncHandler(async (req, res) => {
         user._id
     );
 
-    /*
-    DOUBT:
-        -> Here we have reference of user object without or old refreshtoken.
-        -> We have two choices:
-            -> Again fetch user object from DB which is updated with refreshtoken or
-            -> Update old user object with refreshtoken and send it in response
-    */
-
-    // console.log("user: ", user); // DEBUGGING
-    // const loggedInUser = { ...user }; // *** DOUBT: Why getting additional fields after spreading user object? ***
-
-    // Set password to undefined
-    // const loggedInUser = {
-    //     ...user.toObject(), // *** WHY toObject() ? ***
-    //     password: undefined,
-    //     refreshToken: undefined,
-    // };
-
     // Create a new object without password and refreshToken properties
     const loggedInUser = user.toObject();
     delete loggedInUser.password;
@@ -316,8 +298,10 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 // GET USER
 const getUser = asyncHandler(async (req, res) => {
-    // console.log(req.user)
-    return res.status(200).json(new ApiResponse(200, req.user, "User details"));
+    console.log(req.user);
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "User authenticated"));
 });
 
 export { registerUser, loginUser, logoutUser, getUser };

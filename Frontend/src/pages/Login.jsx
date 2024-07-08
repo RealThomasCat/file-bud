@@ -18,12 +18,6 @@ const Login = () => {
         dispatch(loginUser({ email, password }));
     };
 
-    useEffect(() => {
-        if (authStatus) {
-            console.log(authStatus);
-        }
-    }, [authStatus, navigate]);
-
     return (
         <Container>
             <div className="flex w-full mt-24 items-center justify-center">
