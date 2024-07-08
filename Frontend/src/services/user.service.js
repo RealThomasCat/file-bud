@@ -1,10 +1,13 @@
 import axios from "axios";
 
+// Ensure axios sends cookies with requests
+axios.defaults.withCredentials = true;
+
 const API_URL = import.meta.env.VITE_API_URL + "/api/v1/users"; // TODO: TEST
 
-const register = (username, email, password) => {
+const register = (fullname, email, password) => {
     return axios.post(`${API_URL}/register`, {
-        username,
+        fullname,
         email,
         password,
     });

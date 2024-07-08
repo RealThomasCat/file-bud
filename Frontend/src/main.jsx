@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 import store from "./store/store.js";
 import { AuthLayout } from "./components/index.js";
 import { Login, LandingPage, Home, ErrorPage } from "./pages/index.js";
+import Register from "./pages/Register.jsx";
 
 const router = createBrowserRouter([
     {
@@ -20,14 +21,26 @@ const router = createBrowserRouter([
             },
             {
                 path: "/login",
-                element: <Login />,
+                element: (
+                    <AuthLayout authentication={false}>
+                        <Login />,
+                    </AuthLayout>
+                ),
+            },
+            {
+                path: "/register",
+                element: (
+                    <AuthLayout authentication={false}>
+                        <Register />,
+                    </AuthLayout>
+                ),
             },
             {
                 path: "/home",
                 element: (
-                    // <AuthLayout authentication={false}>
-                    <Home />
-                    // </AuthLayout>
+                    <AuthLayout authentication={true}>
+                        <Home />
+                    </AuthLayout>
                 ),
             },
         ],

@@ -1,18 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import userService from "../services/user.service";
+import userService from "../services/user.service.js";
 
 export const registerUser = createAsyncThunk(
     "user/register",
-    async ({ username, email, password }, thunkAPI) => {
+    async ({ fullname, email, password }, thunkAPI) => {
         try {
             const response = await userService.register(
-                username,
+                fullname,
                 email,
                 password
             );
+            console.log(response.data); // Check what to return
             return response.data;
         } catch (error) {
-            return thunkAPI.rejectWithValue(error.response.data);
+            console.log(error);
+            return thunkAPI.rejectWithValue(error.message);
         }
     }
 );
@@ -22,9 +24,10 @@ export const loginUser = createAsyncThunk(
     async ({ email, password }, thunkAPI) => {
         try {
             const response = await userService.login(email, password);
+            console.log(response.data);
             return response.data;
         } catch (error) {
-            return thunkAPI.rejectWithValue(error.response.data);
+            return thunkAPI.rejectWithValue(error.message);
         }
     }
 );
@@ -41,8 +44,10 @@ const userSlice = createSlice({
     name: "user",
     initialState: {
         user: null,
+        rootFolderId: null,
         isLoading: false,
         error: null,
+        folder: null,
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -66,6 +71,7 @@ const userSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.user = action.payload;
+                state.rootFolderId = action.payload.data.user.rootFolder;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;

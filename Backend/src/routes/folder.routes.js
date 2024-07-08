@@ -13,7 +13,7 @@ const router = Router();
 // Routes
 // Secured routes
 router.route("/create").post(verifyJWT, createFolder);
-router.route("/fetch").post(verifyJWT, fetchFolder);
-router.route("/delete").post(verifyJWT, deleteFolder);
+router.route("/fetch/:folderId").get(verifyJWT, fetchFolder);
+router.route("/delete/:folderId").post(verifyJWT, deleteFolder);
 
 export default router;

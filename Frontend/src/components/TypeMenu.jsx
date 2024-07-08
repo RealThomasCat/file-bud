@@ -1,6 +1,5 @@
 import React from "react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { MainButton } from "./index.js";
 import ImageIcon from "../assets/ImageIcon.svg";
 import VideoIcon from "../assets/VideoIcon.svg";
 

@@ -13,7 +13,10 @@ import path from "path";
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 // Define the path to the log file
-const logFilePath = path.join(__dirname, '../../logs/cloudinary_delete_log.txt');
+const logFilePath = path.join(
+    __dirname,
+    "../../logs/cloudinary_delete_log.txt"
+);
 // console.log(logFilePath)
 
 // FETCH FOLDER
@@ -33,6 +36,8 @@ const fetchFolder = asyncHandler(async (req, res) => {
     if (folder.ownerId.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "Unauthorized access");
     }
+
+    console.log(folder);
 
     // Send folder object in response (contains file array and subfolder array to display in frontend)
     return res.status(200).json(new ApiResponse(200, folder, "Folder found"));
@@ -113,18 +118,25 @@ const deleteFolder = asyncHandler(async (req, res) => {
 
         // Check if the folder to be deleted is the user's root folder
         if (folderId.toString() === user.rootFolder.toString()) {
-            return res.status(403).json({ message: 'Cannot delete root folder' });
+            return res
+                .status(403)
+                .json({ message: "Cannot delete root folder" });
         }
 
-        const folderToDelete = await Folder.findById(folderId).populate('files').populate('subfolders').exec();
+        const folderToDelete = await Folder.findById(folderId)
+            .populate("files")
+            .populate("subfolders")
+            .exec();
 
         if (!folderToDelete) {
-            return res.status(404).json({ message: 'Folder not found' });
+            return res.status(404).json({ message: "Folder not found" });
         }
 
         // Check if the folder belongs to the authenticated user
         if (folderToDelete.ownerId.toString() !== user._id.toString()) {
-            return res.status(403).json({ message: 'You do not have permission to delete this folder' });
+            return res.status(403).json({
+                message: "You do not have permission to delete this folder",
+            });
         }
 
         // Fetch all files and subfolders
@@ -132,32 +144,47 @@ const deleteFolder = asyncHandler(async (req, res) => {
         const subfoldersToDelete = folderToDelete.subfolders;
 
         // Prepare an array to collect all publicIds to be deleted from Cloudinary later
-        let cloudinaryPublicIds = filesToDelete.map(file => file.publicId);
+        let cloudinaryPublicIds = filesToDelete.map((file) => file.publicId);
 
         // Calculate total size of all files to be deleted
-        let totalSizeToDelete = filesToDelete.reduce((total, file) => total + file.size, 0);
+        let totalSizeToDelete = filesToDelete.reduce(
+            (total, file) => total + file.size,
+            0
+        );
 
         // Delete all files metadata if there are any files to delete
         if (filesToDelete.length > 0) {
-            await File.deleteMany({ _id: { $in: filesToDelete.map(file => file._id) } }).session(session);
+            await File.deleteMany({
+                _id: { $in: filesToDelete.map((file) => file._id) },
+            }).session(session);
         }
 
         // Recursively delete subfolders and their contents
         const recursiveDeleteSubfolders = async (folders) => {
             for (const subfolder of folders) {
-                const subfolderDetails = await Folder.findById(subfolder._id).populate('files').populate('subfolders').exec();
+                const subfolderDetails = await Folder.findById(subfolder._id)
+                    .populate("files")
+                    .populate("subfolders")
+                    .exec();
                 const subfolderFiles = subfolderDetails.files;
                 const nestedSubfolders = subfolderDetails.subfolders;
 
                 // Collect cloudinary publicIds from subfolder files
-                cloudinaryPublicIds.push(...subfolderFiles.map(file => file.publicId));
+                cloudinaryPublicIds.push(
+                    ...subfolderFiles.map((file) => file.publicId)
+                );
 
                 // Calculate total size of subfolder files to be deleted
-                totalSizeToDelete += subfolderFiles.reduce((total, file) => total + file.size, 0);
+                totalSizeToDelete += subfolderFiles.reduce(
+                    (total, file) => total + file.size,
+                    0
+                );
 
                 // Delete subfolder files metadata if there are any files to delete
                 if (subfolderFiles.length > 0) {
-                    await File.deleteMany({ _id: { $in: subfolderFiles.map(file => file._id) } }).session(session);
+                    await File.deleteMany({
+                        _id: { $in: subfolderFiles.map((file) => file._id) },
+                    }).session(session);
                 }
 
                 // Recursively delete nested subfolders
@@ -196,16 +223,21 @@ const deleteFolder = asyncHandler(async (req, res) => {
                 await deleteFromCloudinary(publicId);
             } catch (error) {
                 // Log the error and retry later
-                fs.appendFileSync(logFilePath, publicId + '\n');
+                fs.appendFileSync(logFilePath, publicId + "\n");
             }
         }
 
-        res.status(200).json({ message: 'Folder and its contents deleted successfully' });
+        res.status(200).json({
+            message: "Folder and its contents deleted successfully",
+        });
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
-        console.error('Error deleting folder:', error);
-        res.status(500).json({ message: 'An error occurred while deleting the folder', error: error.message });
+        console.error("Error deleting folder:", error);
+        res.status(500).json({
+            message: "An error occurred while deleting the folder",
+            error: error.message,
+        });
     }
 });
 

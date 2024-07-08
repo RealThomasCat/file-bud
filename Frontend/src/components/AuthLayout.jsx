@@ -10,23 +10,23 @@ export default function Protected({ children, authentication = true }) {
     const authStatus = useSelector((state) => state.user.user);
 
     useEffect(() => {
-        //TODO: make it more easy to understand
-
-        // if (authStatus ===true){
-        //     navigate("/")
-        // } else if (authStatus === false) {
-        //     navigate("/login")
-        // }
-
-        //let authValue = authStatus === true ? true : false
-
-        if (authentication && authStatus !== authentication) {
-            navigate("/"); // TODO: change this to landing page
-        } else if (!authentication && authStatus !== authentication) {
-            navigate("/");
+        if (authentication && !authStatus) {
+            navigate("/login");
+        } else if (!authentication && authStatus) {
+            navigate("/home");
+        } else {
+            setLoader(false);
         }
-        setLoader(false);
     }, [authStatus, navigate, authentication]);
+
+    // useEffect(() => {
+    //     if (authentication && authStatus !== authentication) {
+    //         navigate("/login"); // TODO: change this to landing page
+    //     } else if (!authentication && authStatus !== authentication) {
+    //         navigate("/home");
+    //     }
+    //     setLoader(false);
+    // }, [authStatus, navigate, authentication]);
 
     return loader ? <h1>Loading...</h1> : <>{children}</>;
 }

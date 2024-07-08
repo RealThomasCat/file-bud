@@ -255,7 +255,7 @@ const loginUser = asyncHandler(async (req, res) => {
         // HttpOnly: Indicates if the cookie is accessible only through the HTTP protocol and not through client-side scripts.
         httpOnly: true,
         // Secure: Indicates if the cookie should only be transmitted over secure HTTPS connections.
-        secure: true,
+        secure: false, // TODO: Change to true in production
     };
 
     // Send response
