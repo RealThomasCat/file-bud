@@ -9,6 +9,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 // import { fetchFolder } from "../store/folderSlice.js";
 import folderService from "../services/folder.service.js";
+import fileService from "../services/file.service.js";
 import { Link } from "react-router-dom";
 
 function Home() {
@@ -28,11 +29,36 @@ function Home() {
             try {
                 const response = await folderService.fetchFolder(rootFolderId);
                 setFolder(response.data.data);
-                setFiles(response.data.data.files);
+                // setFiles(response.data.data.files);
                 setSubFolders(response.data.data.subFolders);
+
+                // Fetch thumbnails for each file
+                const filesWithThumbnails = await Promise.all(
+                    response.data.data.files.map(async (file) => {
+                        try {
+                            const thumbnailResponse =
+                                await fileService.fetchThumbnail(file._id);
+
+                            console.log(thumbnailResponse);
+
+                            const thumbnailUrl = URL.createObjectURL(
+                                thumbnailResponse.data
+                            );
+                            return { ...file, thumbnailUrl };
+                        } catch (error) {
+                            console.error(
+                                `Error fetching thumbnail for file ${file._id}:`,
+                                error
+                            );
+                            return { ...file, thumbnailUrl: null }; // Handle error by setting thumbnailUrl to null
+                        }
+                    })
+                );
+
+                setFiles(filesWithThumbnails);
             } catch (error) {
-                console.error(error);
-                setError(error);
+                console.error(error.message);
+                setError(error.message);
             }
         };
 

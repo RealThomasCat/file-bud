@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../store/userSlice.js";
 import PrimaryButton from "../components/buttons/PrimaryButton.jsx";
 import { useNavigate } from "react-router-dom";
 import { Container } from "../components/index.js";
+import userService from "../services/user.service.js";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -11,20 +10,25 @@ const Register = () => {
     const [fullname, setFullname] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState(null);
 
-    const dispatch = useDispatch();
-    const authStatus = useSelector((state) => state.user.user);
-    const error = useSelector((state) => state.user.error);
+    const handleRegister = async () => {
+        try {
+            const response = await userService.register(
+                fullname,
+                email,
+                password
+            );
 
-    const handleRegister = () => {
-        dispatch(registerUser({ fullname, email, password }));
+            console.log(response); // DEBUGGING
+
+            navigate("/login");
+        } catch (error) {
+            // TODO: Show right error messages
+            console.log(error.message);
+            setError(error.message);
+        }
     };
-
-    // useEffect(() => {
-    //     if (authStatus) {
-    //         navigate("/home");
-    //     }
-    // }, [authStatus, navigate]);
 
     return (
         <Container>
@@ -94,7 +98,6 @@ const Register = () => {
                 {error && (
                     <p className="max-w-96 text-white overflow-hidden">
                         {error}
-                        {console.log(error)}
                     </p>
                 )}
             </div>
