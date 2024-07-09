@@ -17,7 +17,7 @@ function Home() {
     const [folder, setFolder] = useState(null);
     const [error, setError] = useState(null);
     const [files, setFiles] = useState([]);
-    const [subFolders, setSubFolders] = useState([]);
+    const [subfolders, setSubfolders] = useState([]);
 
     const authStatus = useSelector((state) => state.user.user);
     const rootFolderId = useSelector((state) => state.user.rootFolderId);
@@ -28,33 +28,10 @@ function Home() {
         const fetchFolder = async () => {
             try {
                 const response = await folderService.fetchFolder(rootFolderId);
+                console.log(response.data.data);
                 setFolder(response.data.data);
                 setFiles(response.data.data.files);
-                setSubFolders(response.data.data.subFolders);
-
-                // Fetch thumbnails for each file
-                // const filesWithThumbnails = await Promise.all(
-                //     response.data.data.files.map(async (file) => {
-                //         try {
-                //             const thumbnailResponse =
-                //                 await fileService.fetchThumbnail(file._id);
-
-                //             console.log(thumbnailResponse);
-
-                //             const thumbnailUrl = URL.createObjectURL(
-                //                 thumbnailResponse.data
-                //             );
-                //             return { ...file, thumbnailUrl };
-                //         } catch (error) {
-                //             console.error(
-                //                 `Error fetching thumbnail for file ${file._id}:`,
-                //                 error
-                //             );
-                //             return { ...file, thumbnailUrl: null }; // Handle error by setting thumbnailUrl to null
-                //         }
-                //     })
-                // );
-                // setFiles(filesWithThumbnails);
+                setSubfolders(response.data.data.subfolders);
             } catch (error) {
                 console.error(error.message);
                 setError(error.message);
@@ -106,16 +83,16 @@ function Home() {
             </div>
 
             {(files && files.length > 0) ||
-            (subFolders && subFolders.length > 0) ? (
-                <div className="flex flex-col">
+            (subfolders && subfolders.length > 0) ? (
+                <div className="flex flex-col gap-2">
                     {/* Folders */}
-                    {subFolders && subFolders.length > 0 && (
+                    {subfolders && subfolders.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
-                            {subFolders.map((subFolder) => (
-                                <div key={subFolder._id}>
-                                    <Link to={`/folders/${subFolder._id}`}>
+                            {subfolders.map((subfolder) => (
+                                <div key={subfolder._id}>
+                                    <Link to={`/folders/${subfolder._id}`}>
                                         <FolderCard
-                                            title={subFolder.title} // TODO: show file details after populating the file object
+                                            title={subfolder.title} // TODO: show file details after populating the file object
                                         />
                                     </Link>
                                 </div>
