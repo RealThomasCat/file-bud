@@ -6,6 +6,7 @@ axios.defaults.withCredentials = true;
 const API_URL = import.meta.env.VITE_API_URL + "/api/v1/files"; // TODO: TEST
 
 const fetchThumbnail = (fileId) => {
+    console.log("Hello from file.service.js"); // DEBUGGING
     return axios.get(`${API_URL}/thumbnail/${fileId}`);
 };
 

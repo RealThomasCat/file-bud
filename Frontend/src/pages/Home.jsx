@@ -29,33 +29,32 @@ function Home() {
             try {
                 const response = await folderService.fetchFolder(rootFolderId);
                 setFolder(response.data.data);
-                // setFiles(response.data.data.files);
+                setFiles(response.data.data.files);
                 setSubFolders(response.data.data.subFolders);
 
                 // Fetch thumbnails for each file
-                const filesWithThumbnails = await Promise.all(
-                    response.data.data.files.map(async (file) => {
-                        try {
-                            const thumbnailResponse =
-                                await fileService.fetchThumbnail(file._id);
+                // const filesWithThumbnails = await Promise.all(
+                //     response.data.data.files.map(async (file) => {
+                //         try {
+                //             const thumbnailResponse =
+                //                 await fileService.fetchThumbnail(file._id);
 
-                            console.log(thumbnailResponse);
+                //             console.log(thumbnailResponse);
 
-                            const thumbnailUrl = URL.createObjectURL(
-                                thumbnailResponse.data
-                            );
-                            return { ...file, thumbnailUrl };
-                        } catch (error) {
-                            console.error(
-                                `Error fetching thumbnail for file ${file._id}:`,
-                                error
-                            );
-                            return { ...file, thumbnailUrl: null }; // Handle error by setting thumbnailUrl to null
-                        }
-                    })
-                );
-
-                setFiles(filesWithThumbnails);
+                //             const thumbnailUrl = URL.createObjectURL(
+                //                 thumbnailResponse.data
+                //             );
+                //             return { ...file, thumbnailUrl };
+                //         } catch (error) {
+                //             console.error(
+                //                 `Error fetching thumbnail for file ${file._id}:`,
+                //                 error
+                //             );
+                //             return { ...file, thumbnailUrl: null }; // Handle error by setting thumbnailUrl to null
+                //         }
+                //     })
+                // );
+                // setFiles(filesWithThumbnails);
             } catch (error) {
                 console.error(error.message);
                 setError(error.message);
@@ -127,10 +126,12 @@ function Home() {
                     {/* Files */}
                     {files && files.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
-                            {files.map((file) => (
+                            {files.slice(0, 20).map((file) => (
                                 <div key={file._id}>
                                     <FileCard
+                                        fileId={file._id}
                                         title={file.title} // TODO: show file details after populating the file object
+                                        type={file.resourceType}
                                         // thumbnail={file.thumbnail}
                                         // TODO: thumbnail according to file type
                                     />
