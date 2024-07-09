@@ -14,7 +14,7 @@ import {
     deleteFromCloudinary,
     cloudinaryUrlProvider,
     cloudinaryPrivateDownloadUrl,
-    cloudinaryThumbnailUrl
+    cloudinaryThumbnailUrl,
 } from "../utils/cloudinary.js";
 
 // Get the directory path of the current module using import.meta.url
@@ -26,10 +26,10 @@ const logFilePath = path.join(
     "../../logs/cloudinary_delete_log.txt"
 );
 
-// FETCH FILE
+// FETCH FILE ???
 const fetchFile = asyncHandler(async (req, res) => {
     // Get file id from req
-    const { fileId } = req.body;
+    const { fileId } = req.params.fileId;
 
     // Find file using fileId
     const file = await File.findById(fileId);
@@ -125,8 +125,8 @@ const uploadFile = asyncHandler(async (req, res) => {
 
         // Check if file with same name already exists in current folder
         // Fetch current folder
-        const currentFolder = await Folder.findById(currentFolderId)
-            .populate("files");
+        const currentFolder =
+            await Folder.findById(currentFolderId).populate("files");
 
         // console.log("Current folder after populate:", currentFolder); // DEBUGGING
 
@@ -182,7 +182,10 @@ const uploadFile = asyncHandler(async (req, res) => {
         console.log("New file name ", newFileName); // DEBUGGING
 
         // Upload file to cloudinary
-        const uploadedFile = await uploadToCloudinary(newFilePath, req.file.mimetype);
+        const uploadedFile = await uploadToCloudinary(
+            newFilePath,
+            req.file.mimetype
+        );
 
         // If file is not uploaded to cloudinary throw error
         if (!uploadedFile) {
@@ -274,12 +277,14 @@ const downloadFile = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized access");
     }
 
-
-    const signed_url = cloudinaryPrivateDownloadUrl(requestedFile.publicId, requestedFile.resourceType, requestedFile.format);
-    console.log("signed url", signed_url) //DEBUGGING
+    const signed_url = cloudinaryPrivateDownloadUrl(
+        requestedFile.publicId,
+        requestedFile.resourceType,
+        requestedFile.format
+    );
+    console.log("signed url", signed_url); //DEBUGGING
 
     res.redirect(signed_url);
-
 });
 
 // DELETE FILE (TODO: Use ApiError in catch block?)
@@ -292,9 +297,11 @@ const deleteFile = asyncHandler(async (req, res) => {
         const user = req.user; // Authenticated user information
 
         // Check whether the file with the given ID exists
-        const fileToDelete = await File.findById(fileId).exec().catch((err) => {
-            throw new ApiError(500, "Error finding the file");
-        });
+        const fileToDelete = await File.findById(fileId)
+            .exec()
+            .catch((err) => {
+                throw new ApiError(500, "Error finding the file");
+            });
         if (!fileToDelete) {
             throw new ApiError(404, "File not found");
         }
@@ -308,25 +315,31 @@ const deleteFile = asyncHandler(async (req, res) => {
         await User.updateOne(
             { _id: user._id },
             { $inc: { storageUsed: -fileToDelete.size } }
-        ).session(session).catch((err) => {
-            throw new ApiError(500, "Error updating user storage");
-        });
+        )
+            .session(session)
+            .catch((err) => {
+                throw new ApiError(500, "Error updating user storage");
+            });
 
         // Delete the file ID from the files array of its parent folder
         await Folder.updateOne(
             { _id: fileToDelete.parentFolder },
             { $pull: { files: fileId } }
-        ).session(session).catch((err) => {
-            throw new ApiError(500, "Error updating parent folder");
-        });
+        )
+            .session(session)
+            .catch((err) => {
+                throw new ApiError(500, "Error updating parent folder");
+            });
 
         // Extract Cloudinary publicId before deleting the file document
         const cloudinaryPublicId = fileToDelete.publicId;
 
         // Delete the file document itself
-        await File.deleteOne({ _id: fileId }).session(session).catch((err) => {
-            throw new ApiError(500, "Error deleting the file");
-        });
+        await File.deleteOne({ _id: fileId })
+            .session(session)
+            .catch((err) => {
+                throw new ApiError(500, "Error deleting the file");
+            });
 
         // Commit transaction
         await session.commitTransaction();
@@ -340,15 +353,19 @@ const deleteFile = asyncHandler(async (req, res) => {
             fs.appendFileSync(logFilePath, cloudinaryPublicId + "\n");
         }
 
-        res.status(200).json(new ApiResponse(200, null, "File deleted successfully"));
+        res.status(200).json(
+            new ApiResponse(200, null, "File deleted successfully")
+        );
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
         console.error("Error deleting file:", error);
-        throw new ApiError(error.statusCode || 500, error.message || "An error occurred while deleting the file");
+        throw new ApiError(
+            error.statusCode || 500,
+            error.message || "An error occurred while deleting the file"
+        );
     }
 });
-
 
 // GET FILE THUMBNAIL (TODO: Use ApiError in catch block?)
 const fileThumbnail = asyncHandler(async (req, res) => {
@@ -369,16 +386,21 @@ const fileThumbnail = asyncHandler(async (req, res) => {
     }
 
     // Check if requested file is image or video
-    if (requestedFile.resourceType !== 'video' && requestedFile.resourceType !== 'image') {
+    if (
+        requestedFile.resourceType !== "video" &&
+        requestedFile.resourceType !== "image"
+    ) {
         throw new ApiError(403, "Thumbnail not supported for this file");
     }
 
-
-    const signed_url = cloudinaryThumbnailUrl(requestedFile.publicId, requestedFile.resourceType, requestedFile.format);
-    console.log("signed url", signed_url) //DEBUGGING
+    const signed_url = cloudinaryThumbnailUrl(
+        requestedFile.publicId,
+        requestedFile.resourceType,
+        requestedFile.format
+    );
+    console.log("signed url", signed_url); //DEBUGGING
 
     res.redirect(signed_url);
-
 });
 
 export { fetchFile, uploadFile, downloadFile, deleteFile, fileThumbnail };

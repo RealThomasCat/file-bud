@@ -7,9 +7,7 @@ import {
     FolderCard,
 } from "../components/index.js";
 import { useDispatch, useSelector } from "react-redux";
-// import { fetchFolder } from "../store/folderSlice.js";
 import folderService from "../services/folder.service.js";
-import fileService from "../services/file.service.js";
 import { Link } from "react-router-dom";
 
 function Home() {
@@ -28,7 +26,7 @@ function Home() {
         const fetchFolder = async () => {
             try {
                 const response = await folderService.fetchFolder(rootFolderId);
-                console.log(response.data.data);
+                // console.log(response.data.data); // DEBUGGING
                 setFolder(response.data.data);
                 setFiles(response.data.data.files);
                 setSubfolders(response.data.data.subfolders);
@@ -40,19 +38,6 @@ function Home() {
 
         fetchFolder();
     }, []);
-
-    // useEffect(() => {
-    //     console.log(rootFolderId);
-
-    //     if (rootFolderId) {
-    //         dispatch(fetchFolder(rootFolderId))
-    //             .unwrap() // Returns the actual payload from the promise
-    //             .then((response) => {
-    //                 setFiles(response.data.files);
-    //                 setSubFolders(response.data.subFolders);
-    //             });
-    //     }
-    // }, [dispatch, rootFolderId]);
 
     // TODO: !(authStatus && folder)
     if (!folder) {
