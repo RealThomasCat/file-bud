@@ -15,16 +15,16 @@ function FolderPage() {
     const [folder, setFolder] = useState(null);
     const [error, setError] = useState(null);
     const [files, setFiles] = useState([]);
-    const [subFolders, setSubFolders] = useState([]);
+    const [subfolders, setSubfolders] = useState([]);
 
     useEffect(() => {
         const fetchFolder = async () => {
             try {
                 const response = await folderService.fetchFolder(folderId);
-                // console.log(response.data); // DEBUGGING
+                console.log(response.data); // DEBUGGING
                 setFolder(response.data.data);
                 setFiles(response.data.data.files);
-                setSubFolders(response.data.data.subFolders);
+                setSubfolders(response.data.data.subfolders);
             } catch (error) {
                 console.error(error); // DEBUGGING
                 setError(error);
@@ -32,7 +32,7 @@ function FolderPage() {
         };
 
         fetchFolder();
-    }, []);
+    }, [folderId]);
 
     if (!folder) {
         return (
@@ -61,12 +61,12 @@ function FolderPage() {
             </div>
 
             {(files && files.length > 0) ||
-            (subFolders && subFolders.length > 0) ? (
+            (subfolders && subfolders.length > 0) ? (
                 <div className="flex flex-col gap-2">
                     {/* Folders */}
-                    {subFolders && subFolders.length > 0 && (
+                    {subfolders && subfolders.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
-                            {subFolders.map((subfolder) => (
+                            {subfolders.map((subfolder) => (
                                 <div key={subfolder._id}>
                                     <Link to={`/folders/${subfolder._id}`}>
                                         <FolderCard
