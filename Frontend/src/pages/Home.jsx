@@ -9,6 +9,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import folderService from "../services/folder.service.js";
 import { Link } from "react-router-dom";
+import CreateFolder from "../components/CreateFolder.jsx";
 
 function Home() {
     const dispatch = useDispatch();
@@ -63,6 +64,7 @@ function Home() {
 
                 <div className="w-fit h-full flex gap-4">
                     <Upload />
+                    <CreateFolder />
                     {/* <TypeMenu /> */}
                 </div>
             </div>

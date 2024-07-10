@@ -8,6 +8,7 @@ import {
 } from "../components/index.js";
 import folderService from "../services/folder.service.js";
 import { Link, useParams } from "react-router-dom";
+import CreateFolder from "../components/CreateFolder.jsx";
 
 function FolderPage() {
     const { folderId } = useParams();
@@ -56,6 +57,7 @@ function FolderPage() {
 
                 <div className="w-fit h-full flex gap-4">
                     <Upload />
+                    <CreateFolder />
                     {/* <TypeMenu /> */}
                 </div>
             </div>

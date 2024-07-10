@@ -9,6 +9,11 @@ const fetchFolder = (folderId) => {
     return axios.get(`${API_URL}/fetch/${folderId}`);
 };
 
+const createFolder = (currFolderId, title) => {
+    return axios.post(`${API_URL}/create`, { currFolderId, title });
+};
+
 export default {
     fetchFolder,
+    createFolder,
 };
