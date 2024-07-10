@@ -40,7 +40,7 @@ const fetchFolder = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized access");
     }
 
-    console.log(folder);
+    // console.log(folder); //DEBUGGING
 
     // Send folder object in response (contains file array and subfolder array to display in frontend)
     return res.status(200).json(new ApiResponse(200, folder, "Folder found"));
@@ -52,7 +52,8 @@ const createFolder = asyncHandler(async (req, res) => {
     session.startTransaction();
     try {
         // Get data from req (user comes from token)
-        const { currFolderId, title, user } = req.body;
+        const { currFolderId, title } = req.body;
+        const user = req.user; // Authenticated user information
 
         // Trim folder title and throw error if it is empty
         if (!title?.trim()) {
@@ -63,6 +64,10 @@ const createFolder = asyncHandler(async (req, res) => {
         if (!currFolderId) {
             throw new ApiError(400, "Parent folder information is missing");
         }
+
+        const parentFolder = await Folder.findById(currFolderId).exec().catch((err) => {
+            throw new ApiError(500, "Error finding the Folder, Please Retry!");
+        });
 
         // TODO: Check current folder actually exists and belongs to user
 
@@ -80,18 +85,22 @@ const createFolder = asyncHandler(async (req, res) => {
 
         // Create new folder (transactional operation)
         const newFolder = await Folder.create(
-            {
-                title,
-                ownerId: user._id,
-            },
+            [
+                {
+                    title,
+                    ownerId: user._id,
+                },
+            ],
             { session }
         );
 
         // Add new folder id to parent folder's subfolders array
-        parentFolder.subfolders.push(newFolder._id);
+        parentFolder.subfolders.push(newFolder[0]._id);
 
         // Save parent folder (transactional operation)
         await parentFolder.save({ session });
+
+        // throw new ApiError(500, "This error tests the integrity of transaction mechanism"); //Debugging
 
         // COMMIT TRANSACTION
         await session.commitTransaction();
@@ -106,7 +115,7 @@ const createFolder = asyncHandler(async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         session.endSession();
-        throw error;
+        throw new ApiError(500, error.message);
     }
 });
 

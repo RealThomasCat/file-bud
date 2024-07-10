@@ -356,7 +356,7 @@ const fileThumbnail = asyncHandler(async (req, res) => {
 
     const requestedFile = await File.findById(fileId);
     // console.log(_id);
-    console.log(requestedFile);
+    // console.log(requestedFile); //DEBUGGING
 
     // If user exists then throw error
     if (!requestedFile) {
@@ -375,7 +375,7 @@ const fileThumbnail = asyncHandler(async (req, res) => {
 
 
     const signed_url = cloudinaryThumbnailUrl(requestedFile.publicId, requestedFile.resourceType, requestedFile.format);
-    console.log("signed url", signed_url) //DEBUGGING
+    // console.log("signed url", signed_url) //DEBUGGING
 
     res.redirect(signed_url);
 
