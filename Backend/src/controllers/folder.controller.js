@@ -53,7 +53,6 @@ const createFolder = asyncHandler(async (req, res) => {
     try {
         // Get data from req (user comes from token)
         const { currFolderId, title } = req.body;
-        const user = req.user; // Authenticated user information
 
         // Trim folder title and throw error if it is empty
         if (!title?.trim()) {
@@ -65,30 +64,45 @@ const createFolder = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Parent folder information is missing");
         }
 
-        const parentFolder = await Folder.findById(currFolderId).exec().catch((err) => {
-            throw new ApiError(500, "Error finding the Folder, Please Retry!");
-        });
-
-        // TODO: Check current folder actually exists and belongs to user
+        // Check current folder actually exists, if not throw an error.
+        const parentFolder = await Folder.findById(currFolderId)
+            .populate("subfolders")
+            .exec()
+            .catch((err) => {
+                throw new ApiError(
+                    500,
+                    "Error finding the Folder, Please Retry!"
+                );
+            });
 
         // If parent folder does not exist then throw error
         if (!parentFolder) {
             throw new ApiError(404, "Parent folder not found");
         }
 
-        // Check if same title folder already exists in parent folder's subfolders array
-        const existedFolder = parentFolder.subfolders.find(
-            (folder) => folder.title === title
-        );
+        console.log(parentFolder); // DEBUGGING
 
-        // TODO: If folder already exists then append a count to title
+        // Check if parent folder belongs to user, if not throw error
+        if (parentFolder.ownerId.toString() !== req.user._id.toString()) {
+            throw new ApiError(403, "Unauthorized access");
+        }
+
+        // Check if same title folder already exists in parent folder's subfolders array
+        let newTitle = title;
+        let counter = 1;
+        while (
+            parentFolder.subfolders.some((folder) => folder.title === newTitle)
+        ) {
+            newTitle = `${title} (${counter})`;
+            counter++;
+        }
 
         // Create new folder (transactional operation)
         const newFolder = await Folder.create(
             [
                 {
-                    title,
-                    ownerId: user._id,
+                    title: newTitle,
+                    ownerId: req.user._id,
                 },
             ],
             { session }
@@ -100,7 +114,7 @@ const createFolder = asyncHandler(async (req, res) => {
         // Save parent folder (transactional operation)
         await parentFolder.save({ session });
 
-        // throw new ApiError(500, "This error tests the integrity of transaction mechanism"); //Debugging
+        // throw new ApiError(500, "This error tests the integrity of transaction mechanism"); // Debugging
 
         // COMMIT TRANSACTION
         await session.commitTransaction();
