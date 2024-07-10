@@ -80,7 +80,7 @@ const createFolder = asyncHandler(async (req, res) => {
             throw new ApiError(404, "Parent folder not found");
         }
 
-        console.log(parentFolder); // DEBUGGING
+        // console.log(parentFolder); // DEBUGGING
 
         // Check if parent folder belongs to user, if not throw error
         if (parentFolder.ownerId.toString() !== req.user._id.toString()) {

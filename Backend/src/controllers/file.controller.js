@@ -398,7 +398,7 @@ const fileThumbnail = asyncHandler(async (req, res) => {
         requestedFile.resourceType,
         requestedFile.format
     );
-    console.log("signed url", signed_url); //DEBUGGING
+    // console.log("signed url", signed_url); //DEBUGGING
 
     res.redirect(signed_url);
 });
