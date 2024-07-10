@@ -1,24 +1,39 @@
-import React, { useState } from "react";
-import UploadIcon from "../assets/AddIcon.svg";
+import React, { useEffect, useState } from "react";
+import fileIcon from "../assets/FileIcon.svg";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { PrimaryButton } from "./index.js";
+import { useParams } from "react-router-dom";
+import fileService from "../services/file.service.js";
 
-function Upload({ action }) {
+function Upload() {
+    const { folderId } = useParams();
+
     const [isOpen, setIsOpen] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [file, setFile] = useState(null);
+
+    const handleUpload = async () => {
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            console.log("File: ", file);
+            formData.append("folderId", folderId); // Append folderId if required by the API
+            console.log("Folder ID: ", folderId);
+
+            await fileService.uploadFile(formData);
+            setIsOpen(false);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="h-full aspect-square rounded-full bg-primary text-lg font-medium text-textCol"
+                className="h-full w-40 aspect-square flex justify-center items-center gap-2 rounded-full bg-glass bg-opacity-15 border border-borderCol border-opacity-15 text-base font-medium text-textCol"
             >
-                <img
-                    className="w-5 h-5 m-auto"
-                    src={UploadIcon}
-                    alt="Upload Icon"
-                />
+                <img className="w-4 h-4" src={fileIcon} alt="Upload Icon" />
+                <h1 className="pb-0.5">Upload File</h1>
             </button>
 
             <Dialog
@@ -36,37 +51,18 @@ function Upload({ action }) {
                                 className="text-textCol w-full text-left px-1"
                                 htmlFor="email"
                             >
-                                Email:
+                                File:
                             </label>
                             <input
-                                name="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="example@email.com"
-                                className="w-full h-10 py-2 px-3 pb-2.5 rounded-lg bg-bgCol text-textCol focus:outline-none"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-3">
-                            <label
-                                className="text-textCol w-full text-left px-1"
-                                htmlFor="password"
-                            >
-                                Password:
-                            </label>
-                            <input
-                                name="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="examplePassword"
-                                className="w-full h-10 py-2 px-3 pb-2.5 rounded-lg bg-bgCol text-textCol focus:outline-none"
+                                name="file"
+                                type="file"
+                                onChange={(e) => setFile(e.target.files[0])}
+                                className=""
                             />
                         </div>
                         <div className="flex justify-center items-center w-full h-10 mt-4 mb-3">
                             <PrimaryButton
-                                action={() => setIsOpen(false)}
+                                action={handleUpload}
                                 title="Upload"
                             />
                         </div>

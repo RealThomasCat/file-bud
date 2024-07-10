@@ -10,14 +10,13 @@ const fetchThumbnail = (fileId) => {
     return axios.get(`${API_URL}/thumbnail/${fileId}`);
 };
 
-// export const uploadFile = async (fileData) => {
-//     const response = await axios.post(`${API_URL}/upload`, fileData, {
-//         headers: {
-//             "Content-Type": "multipart/form-data",
-//         },
-//     });
-//     return response.data;
-// };
+const uploadFile = (formData) => {
+    return axios.post(`${API_URL}/upload`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+};
 
 // export const fetchFile = async (fileId) => {
 //     const response = await axios.get(`${API_URL}/${fileId}`);
@@ -38,4 +37,5 @@ const fetchThumbnail = (fileId) => {
 
 export default {
     fetchThumbnail,
+    uploadFile,
 };

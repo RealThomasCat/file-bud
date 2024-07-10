@@ -89,7 +89,7 @@ const fetchFile = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, downloadedFile, "File found"));
 });
 
-// UPLOAD FILE *** DOUBT *** (TODO: Thumbnail has to be configured in cloudinary)
+// UPLOAD FILE
 const uploadFile = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
 
