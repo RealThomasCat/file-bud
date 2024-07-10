@@ -6,29 +6,27 @@ import {
     TypeMenu,
     FolderCard,
 } from "../components/index.js";
-import { useDispatch, useSelector } from "react-redux";
 import folderService from "../services/folder.service.js";
 import { Link, useParams } from "react-router-dom";
 
 function FolderPage() {
+    const { folderId } = useParams();
+
     const [folder, setFolder] = useState(null);
     const [error, setError] = useState(null);
     const [files, setFiles] = useState([]);
     const [subFolders, setSubFolders] = useState([]);
 
-    const folderId = useParams();
-
-    // TODO: FETCH THUMBNAILS
-
     useEffect(() => {
         const fetchFolder = async () => {
             try {
                 const response = await folderService.fetchFolder(folderId);
-                setFolder(response.data);
+                // console.log(response.data); // DEBUGGING
+                setFolder(response.data.data);
                 setFiles(response.data.data.files);
                 setSubFolders(response.data.data.subFolders);
             } catch (error) {
-                console.error(error);
+                console.error(error); // DEBUGGING
                 setError(error);
             }
         };
@@ -64,15 +62,15 @@ function FolderPage() {
 
             {(files && files.length > 0) ||
             (subFolders && subFolders.length > 0) ? (
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-2">
                     {/* Folders */}
                     {subFolders && subFolders.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
-                            {subFolders.map((subFolder) => (
-                                <div key={subFolder._id}>
-                                    <Link to={`/folders/${subFolder._id}`}>
+                            {subFolders.map((subfolder) => (
+                                <div key={subfolder._id}>
+                                    <Link to={`/folders/${subfolder._id}`}>
                                         <FolderCard
-                                            title={subFolder.title} // TODO: show file details after populating the file object
+                                            title={subfolder.title} // TODO: show file details after populating the file object
                                         />
                                     </Link>
                                 </div>
@@ -83,10 +81,12 @@ function FolderPage() {
                     {/* Files */}
                     {files && files.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
-                            {files.map((file) => (
+                            {files.slice(0, 20).map((file) => (
                                 <div key={file._id}>
                                     <FileCard
+                                        fileId={file._id}
                                         title={file.title} // TODO: show file details after populating the file object
+                                        type={file.resourceType}
                                         // thumbnail={file.thumbnail}
                                         // TODO: thumbnail according to file type
                                     />
@@ -97,7 +97,7 @@ function FolderPage() {
                 </div>
             ) : (
                 <div className="w-full text-center text-white">
-                    Your drive is empty.
+                    This folder is empty.
                 </div>
             )}
         </Container>

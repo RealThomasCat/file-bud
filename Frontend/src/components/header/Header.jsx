@@ -14,6 +14,8 @@ function Header() {
     // Get the user authentication status from the redux store
     const dispatch = useDispatch();
     const authStatus = useSelector((state) => state.user.user);
+    const storageUsed = useSelector((state) => state.user.storageUsed);
+    const maxStorage = useSelector((state) => state.user.maxStorage);
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -51,10 +53,22 @@ function Header() {
                         {/* Account Button */}
                         {authStatus && (
                             <>
+                                <div className="h-full w-36 flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary pb-0.5">
+                                    <h1 className="text-primary">
+                                        {(
+                                            storageUsed /
+                                            (1024 * 1024 * 1024)
+                                        ).toFixed(2)}{" "}
+                                        GB / {maxStorage / (1024 * 1024 * 1024)}{" "}
+                                        GB
+                                    </h1>
+                                </div>
+
                                 <SecondaryButton
                                     title="Logout"
                                     action={handleLogout}
                                 />
+
                                 <Account />
                             </>
                         )}

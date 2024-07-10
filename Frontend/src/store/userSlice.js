@@ -53,7 +53,8 @@ const userSlice = createSlice({
         rootFolderId: null,
         isLoading: false,
         error: null,
-        folder: null,
+        storageUsed: null,
+        maxStorage: null,
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -66,6 +67,8 @@ const userSlice = createSlice({
                 state.isLoading = false;
                 state.user = action.payload;
                 state.rootFolderId = action.payload.data.user.rootFolder;
+                state.storageUsed = action.payload.data.user.storageUsed;
+                state.maxStorage = action.payload.data.user.maxStorage;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.isLoading = false;
@@ -82,6 +85,8 @@ const userSlice = createSlice({
                 state.isLoading = false;
                 state.user = action.payload;
                 state.rootFolderId = action.payload.data.rootFolder;
+                state.storageUsed = action.payload.data.storageUsed;
+                state.maxStorage = action.payload.data.maxStorage;
             })
             .addCase(getUser.rejected, (state, action) => {
                 state.isLoading = false;
