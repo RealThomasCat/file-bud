@@ -18,20 +18,20 @@ function FolderPage() {
     const [files, setFiles] = useState([]);
     const [subfolders, setSubfolders] = useState([]);
 
-    useEffect(() => {
-        const fetchFolder = async () => {
-            try {
-                const response = await folderService.fetchFolder(folderId);
-                console.log(response.data); // DEBUGGING
-                setFolder(response.data.data);
-                setFiles(response.data.data.files);
-                setSubfolders(response.data.data.subfolders);
-            } catch (error) {
-                console.error(error); // DEBUGGING
-                setError(error);
-            }
-        };
+    const fetchFolder = async () => {
+        try {
+            const response = await folderService.fetchFolder(folderId);
+            // console.log(response.data); // DEBUGGING
+            setFolder(response.data.data);
+            setFiles(response.data.data.files);
+            setSubfolders(response.data.data.subfolders);
+        } catch (error) {
+            // console.error(error); // DEBUGGING
+            setError(error);
+        }
+    };
 
+    useEffect(() => {
         fetchFolder();
     }, [folderId]);
 
@@ -56,8 +56,14 @@ function FolderPage() {
                 </h1>
 
                 <div className="w-fit h-full flex gap-4">
-                    <Upload />
-                    <CreateFolder />
+                    <Upload
+                        onUploadComplete={fetchFolder}
+                        folderId={folderId}
+                    />
+                    <CreateFolder
+                        onUploadComplete={fetchFolder}
+                        folderId={folderId}
+                    />
                     {/* <TypeMenu /> */}
                 </div>
             </div>

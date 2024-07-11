@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { logoutUser } from "../../store/userSlice.js";
 import {
     Container,
@@ -12,6 +12,7 @@ import {
 
 function Header() {
     // Get the user authentication status from the redux store
+    const location = useLocation();
     const dispatch = useDispatch();
     const authStatus = useSelector((state) => state.user.user);
     const storageUsed = useSelector((state) => state.user.storageUsed);
@@ -25,7 +26,7 @@ function Header() {
     return (
         <Container>
             <header className="h-28 py-6">
-                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass bg-opacity-10 border border-borderCol border-opacity-15">
+                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass border border-borderCol border-opacity-15">
                     <div className="flex justify-center items-center gap-3">
                         {/* Logo */}
                         <Link to="/home">
@@ -53,16 +54,28 @@ function Header() {
                         {/* Account Button */}
                         {authStatus && (
                             <>
-                                <div className="h-full w-36 flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary pb-0.5">
-                                    <h1 className="text-primary">
-                                        {(
-                                            storageUsed /
-                                            (1024 * 1024 * 1024)
-                                        ).toFixed(2)}{" "}
-                                        GB / {maxStorage / (1024 * 1024 * 1024)}{" "}
-                                        GB
-                                    </h1>
-                                </div>
+                                {location.pathname !== "/" && (
+                                    <div className="h-full w-36 text-lg flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary">
+                                        <h1 className="text-primary">
+                                            {(
+                                                storageUsed /
+                                                (1024 * 1024 * 1024)
+                                            ).toFixed(2)}
+                                            /
+                                            {(
+                                                maxStorage /
+                                                (1024 * 1024 * 1024)
+                                            ).toFixed(2)}{" "}
+                                            GB
+                                        </h1>
+                                    </div>
+                                )}
+
+                                {location.pathname === "/" && (
+                                    <Link to="/home">
+                                        <SecondaryButton title="Go to drive" />
+                                    </Link>
+                                )}
 
                                 <SecondaryButton
                                     title="Logout"

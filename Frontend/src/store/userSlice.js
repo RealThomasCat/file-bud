@@ -1,24 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import userService from "../services/user.service.js";
 
-// export const registerUser = createAsyncThunk(
-//     "user/register",
-//     async ({ fullname, email, password }, thunkAPI) => {
-//         try {
-//             const response = await userService.register(
-//                 fullname,
-//                 email,
-//                 password
-//             );
-//             console.log(response.data); // DEBUGGING
-//             return response.data;
-//         } catch (error) {
-//             console.log(error);
-//             return thunkAPI.rejectWithValue(error.message);
-//         }
-//     }
-// );
-
 export const loginUser = createAsyncThunk(
     "user/login",
     async ({ email, password }, thunkAPI) => {
@@ -51,12 +33,16 @@ const userSlice = createSlice({
     initialState: {
         user: null,
         rootFolderId: null,
-        isLoading: false,
+        isLoading: true,
         error: null,
         storageUsed: null,
         maxStorage: null,
     },
-    reducers: {},
+    reducers: {
+        updateStorageUsed: (state, action) => {
+            state.storageUsed += action.payload;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(loginUser.pending, (state) => {
@@ -95,4 +81,5 @@ const userSlice = createSlice({
     },
 });
 
+export const { updateStorageUsed } = userSlice.actions;
 export default userSlice.reducer;

@@ -2,35 +2,52 @@ import React, { useEffect, useState } from "react";
 import fileIcon from "../assets/FileIcon.svg";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { PrimaryButton } from "./index.js";
-import { useParams } from "react-router-dom";
 import fileService from "../services/file.service.js";
+import { updateStorageUsed } from "../store/userSlice.js";
+import { useDispatch } from "react-redux";
 
-function Upload() {
-    const { folderId } = useParams();
-
+function Upload({ onUploadComplete, folderId }) {
+    const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const [file, setFile] = useState(null);
+    const [fileSize, setFileSize] = useState(0); // Store file size
 
     const handleUpload = async () => {
         try {
             const formData = new FormData();
             formData.append("file", file);
-            console.log("File: ", file);
+            // console.log("File: ", file); // DEBUGGING
             formData.append("folderId", folderId); // Append folderId if required by the API
-            console.log("Folder ID: ", folderId);
+            // console.log("Folder ID: ", folderId); // DEBUGGING
 
-            await fileService.uploadFile(formData);
+            const response = await fileService.uploadFile(formData);
+            // console.log(response); // DEBUGGING
+
+            if (response.status === 200) {
+                const uploadedFileSize = response.data.data.size;
+                // console.log("Uploaded File Size: ", uploadedFileSize); // DEBUGGING
+                dispatch(updateStorageUsed(uploadedFileSize));
+            }
+
             setIsOpen(false);
+            onUploadComplete();
+            return response;
         } catch (error) {
             console.log(error);
         }
+    };
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        setFile(selectedFile);
+        setFileSize(selectedFile.size); // Store file size
     };
 
     return (
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="h-full w-40 aspect-square flex justify-center items-center gap-2 rounded-full bg-glass bg-opacity-15 border border-borderCol border-opacity-15 text-base font-medium text-textCol"
+                className="h-full w-40 aspect-square flex justify-center items-center gap-2 rounded-full bg-glass border border-borderCol border-opacity-15 text-base font-medium text-textCol"
             >
                 <img className="w-4 h-4" src={fileIcon} alt="Upload Icon" />
                 <h1 className="pb-0.5">Upload File</h1>
@@ -41,8 +58,8 @@ function Upload() {
                 onClose={() => setIsOpen(false)}
                 className="relative z-50"
             >
-                <div className="fixed inset-0 flex w-screen items-center justify-center mx-auto">
-                    <DialogPanel className="w-full max-w-96 bg-glass bg-opacity-10 px-4 py-6 rounded-lg flex flex-col gap-6 border border-borderCol border-opacity-10 backdrop-blur-md">
+                <div className="fixed inset-0 flex w-screen items-center justify-center mx-auto bg-black bg-opacity-75">
+                    <DialogPanel className="w-full max-w-96 bg-glass px-4 py-6 rounded-lg flex flex-col gap-6 border border-borderCol border-opacity-10">
                         <DialogTitle className="w-full text-xl font-light text-textCol text-center">
                             Upload Image or Video File
                         </DialogTitle>
@@ -56,7 +73,7 @@ function Upload() {
                             <input
                                 name="file"
                                 type="file"
-                                onChange={(e) => setFile(e.target.files[0])}
+                                onChange={handleFileChange}
                                 className=""
                             />
                         </div>

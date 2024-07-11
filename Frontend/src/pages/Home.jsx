@@ -21,26 +21,23 @@ function Home() {
     const authStatus = useSelector((state) => state.user.user);
     const rootFolderId = useSelector((state) => state.user.rootFolderId);
 
-    // TODO: FETCH THUMBNAILS
+    const fetchFolder = async () => {
+        try {
+            const response = await folderService.fetchFolder(rootFolderId);
+            // console.log(response.data.data); // DEBUGGING
+            setFolder(response.data.data);
+            setFiles(response.data.data.files);
+            setSubfolders(response.data.data.subfolders);
+        } catch (error) {
+            console.error(error.message);
+            setError(error.message);
+        }
+    };
 
     useEffect(() => {
-        const fetchFolder = async () => {
-            try {
-                const response = await folderService.fetchFolder(rootFolderId);
-                // console.log(response.data.data); // DEBUGGING
-                setFolder(response.data.data);
-                setFiles(response.data.data.files);
-                setSubfolders(response.data.data.subfolders);
-            } catch (error) {
-                console.error(error.message);
-                setError(error.message);
-            }
-        };
-
         fetchFolder();
     }, []);
 
-    // TODO: !(authStatus && folder)
     if (!folder) {
         return (
             <div className="w-full py-8 mt-4 text-center">
@@ -63,8 +60,14 @@ function Home() {
                 </h1>
 
                 <div className="w-fit h-full flex gap-4">
-                    <Upload />
-                    <CreateFolder />
+                    <Upload
+                        onUploadComplete={fetchFolder}
+                        folderId={rootFolderId}
+                    />
+                    <CreateFolder
+                        onUploadComplete={fetchFolder}
+                        folderId={rootFolderId}
+                    />
                     {/* <TypeMenu /> */}
                 </div>
             </div>

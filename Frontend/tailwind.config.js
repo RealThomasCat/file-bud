@@ -6,7 +6,7 @@ export default {
             colors: {
                 primary: "#828FFF",
                 bgCol: "#030015",
-                glass: "#B094FF",
+                glass: "#2A2A2A",
                 borderCol: "#FFFFFF",
                 textCol: "#FFFFFF",
             },

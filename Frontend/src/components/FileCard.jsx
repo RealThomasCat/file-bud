@@ -17,7 +17,7 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
                         setIsOpen(true);
                     }
                 }}
-                className="aspect-square text-textCol flex flex-col gap-3 bg-glass bg-opacity-10 border border-borderCol border-opacity-15 p-2 rounded-lg overflow-hidden"
+                className="aspect-square text-textCol flex flex-col gap-3 bg-glass border border-borderCol border-opacity-15 p-2 rounded-lg overflow-hidden"
             >
                 <div className="w-full flex justify-between items-center pl-1">
                     <div className="w-fit h-full flex items-center gap-2 overflow-hidden">
