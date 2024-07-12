@@ -17,7 +17,7 @@ const router = Router();
 
 // Routes
 // Secured routes
-router.route("/fetch").post(verifyJWT, fetchFile);
+router.route("/fetch").get(verifyJWT, fetchFile);
 router.route("/upload").post(
     verifyJWT,
     upload.single("file"),

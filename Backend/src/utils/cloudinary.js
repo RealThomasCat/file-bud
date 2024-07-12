@@ -17,17 +17,15 @@ const uploadToCloudinary = async (localFilePath, mimeType) => {
 
         const response = mimeType.startsWith("video")
             ? await cloudinary.uploader.upload(localFilePath, {
-                resource_type: 'video',
-                type: 'authenticated',
-                eager: [
-                    { streaming_profile: 'hd', format: 'm3u8' }
-                ],
-                eager_async: true
-            })
+                  resource_type: "video",
+                  type: "authenticated",
+                  eager: [{ streaming_profile: "hd", format: "m3u8" }],
+                  eager_async: true,
+              })
             : await cloudinary.uploader.upload(localFilePath, {
-                resource_type: "auto",
-                type: 'authenticated'
-            });
+                  resource_type: "auto",
+                  type: "authenticated",
+              });
 
         // file has been uploaded successfully
         fs.unlinkSync(localFilePath);
@@ -38,7 +36,6 @@ const uploadToCloudinary = async (localFilePath, mimeType) => {
         return null;
     }
 };
-
 
 // DOWNLOAD FILE FROM CLOUDINARY TO LOCAL STORAGE (TODO: TEST)
 const downloadFromCloudinary = async (fileURL) => {
@@ -92,7 +89,6 @@ const deleteFromCloudinary = async (fileURL) => {
 
 // Provides signed url for authenticated uploads
 const cloudinaryUrlProvider = (publicId, resource_type) => {
-
     return cloudinary.url(publicId, {
         type: "authenticated",
         resource_type: resource_type,
@@ -103,10 +99,21 @@ const cloudinaryUrlProvider = (publicId, resource_type) => {
 // Provides TIME LIMITED signed url for authenticated uploads
 const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
     const options = {
-        type: 'authenticated', // Use 'authenticated' type for private videos
+        type: "authenticated", // Use 'authenticated' type for private videos
         resource_type: resource_type,
         expires_at: Math.floor(Date.now() / 1000) + 3600, // URL expires in 1hr
-        attachment: true // Indicate that the content should be downloaded
+        attachment: true, // Indicate that the content should be downloaded
+    };
+
+    return cloudinary.utils.private_download_url(publicId, format, options);
+};
+
+// Provides TIME LIMITED signed url for authenticated uploads
+const cloudinaryPrivateStreamUrl = (publicId, resource_type, format) => {
+    const options = {
+        type: "authenticated", // Use 'authenticated' type for private videos
+        resource_type: resource_type,
+        expires_at: Math.floor(Date.now() / 1000) + 3600, // URL expires in 1hr
     };
 
     return cloudinary.utils.private_download_url(publicId, format, options);
@@ -115,25 +122,36 @@ const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
 // Provides signed url for thumnail of authenticated uploads
 const cloudinaryThumbnailUrl = (publicId, resource_type, format) => {
     let thumbnailUrl = null;
-    if (resource_type === 'image' || resource_type === 'video') {
-        const transformations = [{ width: 300, height: 300, crop: 'scale' }];
+    if (resource_type === "image" || resource_type === "video") {
+        const transformations = [{ width: 300, height: 300, crop: "scale" }];
 
-        if (resource_type === 'video') {
-            transformations.push({ fetch_format: 'jpg' }, { start_offset: 'auto' });
-        } else if (resource_type === 'image' && format === 'pdf') {
-            transformations.push({ page: 1, fetch_format: 'jpg' });
+        if (resource_type === "video") {
+            transformations.push(
+                { fetch_format: "jpg" },
+                { start_offset: "auto" }
+            );
+        } else if (resource_type === "image" && format === "pdf") {
+            transformations.push({ page: 1, fetch_format: "jpg" });
         }
 
         thumbnailUrl = cloudinary.url(publicId, {
             resource_type: resource_type,
-            type: 'authenticated',
+            type: "authenticated",
             sign_url: true,
             transformation: transformations,
-            format: 'jpg' // Ensure the output is in JPG format for videos and PDFs
+            format: "jpg", // Ensure the output is in JPG format for videos and PDFs
         });
     }
 
     return thumbnailUrl;
 };
 
-export { uploadToCloudinary, downloadFromCloudinary, deleteFromCloudinary, cloudinaryUrlProvider, cloudinaryPrivateDownloadUrl, cloudinaryThumbnailUrl };
+export {
+    uploadToCloudinary,
+    downloadFromCloudinary,
+    deleteFromCloudinary,
+    cloudinaryUrlProvider,
+    cloudinaryPrivateDownloadUrl,
+    cloudinaryThumbnailUrl,
+    cloudinaryPrivateStreamUrl,
+};
