@@ -7,15 +7,18 @@ import fileIcon from "../assets/FileIcon.svg";
 import downloadIcon from "../assets/DownloadIcon.svg";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import fileService from "../services/file.service.js";
+import { useNavigate } from "react-router-dom";
 
 function FileCard({ title = "File Name", type = "image", fileId }) {
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
 
     const handleDownload = async () => {
         try {
             console.log(fileId); // DEBUGGING
             const response = await fileService.downloadFile(fileId);
-            console.log(response); // DEBUGGING
+            console.log(response.data.data); // DEBUGGING
+            window.open(`${response.data.data.signed_url}`, "_blank");
             return response;
         } catch (error) {
             console.log(error);
@@ -25,11 +28,7 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
     return (
         <>
             <div
-                onDoubleClick={() => {
-                    if (type === "image") {
-                        setIsOpen(true);
-                    }
-                }}
+                onDoubleClick={showFile}
                 className="aspect-square text-textCol flex flex-col gap-3 bg-glass border border-borderCol border-opacity-15 p-2 rounded-lg overflow-hidden"
             >
                 <div className="w-full flex justify-between items-center pl-1">

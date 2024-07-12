@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Ensure axios sends cookies with requests
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = false;
 
 const API_URL = import.meta.env.VITE_API_URL + "/api/v1/files"; // TODO: TEST
 
@@ -22,7 +22,7 @@ const downloadFile = (fileId) => {
     console.log("Sending File ID:", fileId); //DEBUGGING
     return axios.get(`${API_URL}/download`, {
         params: { fileId },
-        responseType: "blob",
+        // responseType: "blob",
     });
 };
 
