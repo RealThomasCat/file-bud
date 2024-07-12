@@ -5,12 +5,11 @@ import imageIcon from "../assets/ImageIcon.svg";
 import videoIcon from "../assets/VideoIcon.svg";
 import fileIcon from "../assets/FileIcon.svg";
 import downloadIcon from "../assets/DownloadIcon.svg";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import fileService from "../services/file.service.js";
-import { useNavigate } from "react-router-dom";
 
 function FileCard({ title = "File Name", type = "image", fileId }) {
-    const navigate = useNavigate();
+    const [file, setFile] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
     const handleDownload = async () => {
@@ -22,6 +21,20 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
             return response;
         } catch (error) {
             console.log(error);
+        }
+    };
+
+    const showFile = async () => {
+        if (type === "image") {
+            try {
+                setIsOpen(true);
+                const response = await fileService.fetchFile(fileId);
+                setFile(response.data.data.signed_url);
+                console.log(response.data.data.signed_url); // DEBUGGING
+                return response;
+            } catch (error) {
+                console.log(error);
+            }
         }
     };
 
@@ -103,7 +116,7 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
                         <div className="h-full">
                             <img
                                 // TODO: Fetch file from backend
-                                src={`http://localhost:8000/api/v1/files/thumbnail/${fileId}`}
+                                src={`${file}`}
                                 alt={title}
                                 className="h-full object-contain"
                             />

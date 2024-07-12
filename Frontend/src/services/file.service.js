@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Ensure axios sends cookies with requests
-axios.defaults.withCredentials = false;
+axios.defaults.withCredentials = true;
 
 const API_URL = import.meta.env.VITE_API_URL + "/api/v1/files"; // TODO: TEST
 
@@ -26,10 +26,9 @@ const downloadFile = (fileId) => {
     });
 };
 
-// export const fetchFile = async (fileId) => {
-//     const response = await axios.get(`${API_URL}/${fileId}`);
-//     return response.data;
-// };
+const fetchFile = (fileId) => {
+    return axios.get(`${API_URL}/fetch`, { params: { fileId } });
+};
 
 // export const deleteFile = async (fileId) => {
 //     const response = await axios.delete(`${API_URL}/${fileId}`);
@@ -40,4 +39,5 @@ export default {
     fetchThumbnail,
     uploadFile,
     downloadFile,
+    fetchFile,
 };
