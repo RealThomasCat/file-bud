@@ -261,7 +261,9 @@ const uploadFile = asyncHandler(async (req, res) => {
 
 // DOWNLOAD FILE (TODO: Use ApiError in catch block?)
 const downloadFile = asyncHandler(async (req, res) => {
-    const { fileId } = req.body;
+    const { fileId } = req.query;
+
+    console.log("File ID", fileId); //DEBUGGING
 
     const requestedFile = await File.findById(fileId);
     // console.log(_id);

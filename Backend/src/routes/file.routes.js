@@ -5,7 +5,7 @@ import {
     fetchFile,
     downloadFile,
     deleteFile,
-    fileThumbnail
+    fileThumbnail,
 } from "../controllers/file.controller.js";
 import {
     multerErrorHandler,
@@ -24,7 +24,7 @@ router.route("/upload").post(
     multerErrorHandler, // REVIEW: Is this necessary?
     uploadFile
 ); // TODO: Make secure
-router.route("/download").post(verifyJWT, downloadFile);
+router.route("/download").get(verifyJWT, downloadFile);
 router.route("/delete").post(verifyJWT, deleteFile);
 router.route("/thumbnail/:id").get(verifyJWT, fileThumbnail);
 

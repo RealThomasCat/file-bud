@@ -55,7 +55,7 @@ function Header() {
                         {authStatus && (
                             <>
                                 {location.pathname !== "/" && (
-                                    <div className="h-full w-36 text-lg flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary">
+                                    <div className="h-full w-40 text-lg flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary">
                                         <h1 className="text-primary">
                                             {(
                                                 storageUsed /

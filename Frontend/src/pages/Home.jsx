@@ -3,7 +3,6 @@ import {
     Container,
     FileCard,
     Upload,
-    TypeMenu,
     FolderCard,
 } from "../components/index.js";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,13 +11,11 @@ import { Link } from "react-router-dom";
 import CreateFolder from "../components/CreateFolder.jsx";
 
 function Home() {
-    const dispatch = useDispatch();
     const [folder, setFolder] = useState(null);
     const [error, setError] = useState(null);
     const [files, setFiles] = useState([]);
     const [subfolders, setSubfolders] = useState([]);
 
-    const authStatus = useSelector((state) => state.user.user);
     const rootFolderId = useSelector((state) => state.user.rootFolderId);
 
     const fetchFolder = async () => {
@@ -93,7 +90,7 @@ function Home() {
                     {/* Files */}
                     {files && files.length > 0 && (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
-                            {files.slice(0, 20).map((file) => (
+                            {files.map((file) => (
                                 <div key={file._id}>
                                     <FileCard
                                         fileId={file._id}

@@ -1,12 +1,13 @@
 import React, { act } from "react";
 
-function MainButton({ title, action }) {
+function MainButton({ title, action, icon }) {
     return (
         <button
             onClick={action}
-            className="h-full w-28 rounded-full bg-glass bg-opacity-10 border border-borderCol border-opacity-15 text-textCol pb-1 "
+            className="h-full w-44 aspect-square flex justify-center items-center gap-3 rounded-full bg-glass border border-borderCol border-opacity-15 text-base font-medium text-textCol"
         >
-            {title}
+            {icon && <img className="max-h-4" src={icon} alt="Icon" />}
+            <h1>{title}</h1>
         </button>
     );
 }

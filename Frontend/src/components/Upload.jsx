@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import fileIcon from "../assets/FileIcon.svg";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { PrimaryButton } from "./index.js";
+import { MainButton, PrimaryButton } from "./index.js";
 import fileService from "../services/file.service.js";
 import { updateStorageUsed } from "../store/userSlice.js";
 import { useDispatch } from "react-redux";
@@ -45,13 +45,11 @@ function Upload({ onUploadComplete, folderId }) {
 
     return (
         <>
-            <button
-                onClick={() => setIsOpen(true)}
-                className="h-full w-40 aspect-square flex justify-center items-center gap-2 rounded-full bg-glass border border-borderCol border-opacity-15 text-base font-medium text-textCol"
-            >
-                <img className="w-4 h-4" src={fileIcon} alt="Upload Icon" />
-                <h1 className="pb-0.5">Upload File</h1>
-            </button>
+            <MainButton
+                action={() => setIsOpen(true)}
+                title="Upload File"
+                icon={fileIcon}
+            />
 
             <Dialog
                 open={isOpen}

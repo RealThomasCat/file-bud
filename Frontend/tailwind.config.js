@@ -5,10 +5,10 @@ export default {
         extend: {
             colors: {
                 primary: "#828FFF",
-                bgCol: "#030015",
+                bgCol: "#151515",
                 glass: "#2A2A2A",
                 borderCol: "#FFFFFF",
-                textCol: "#FFFFFF",
+                textCol: "#EFEFEF",
             },
         },
     },

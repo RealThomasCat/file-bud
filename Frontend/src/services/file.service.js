@@ -18,6 +18,14 @@ const uploadFile = (formData) => {
     });
 };
 
+const downloadFile = (fileId) => {
+    console.log("Sending File ID:", fileId); //DEBUGGING
+    return axios.get(`${API_URL}/download`, {
+        params: { fileId },
+        responseType: "blob",
+    });
+};
+
 // export const fetchFile = async (fileId) => {
 //     const response = await axios.get(`${API_URL}/${fileId}`);
 //     return response.data;
@@ -28,14 +36,8 @@ const uploadFile = (formData) => {
 //     return response.data;
 // };
 
-// export const downloadFile = async (fileId) => {
-//     const response = await axios.get(`${API_URL}/download/${fileId}`, {
-//         responseType: "blob",
-//     });
-//     return response.data;
-// };
-
 export default {
     fetchThumbnail,
     uploadFile,
+    downloadFile,
 };
