@@ -57,11 +57,11 @@ function FolderPage() {
 
                 <div className="w-fit h-full flex gap-4">
                     <Upload
-                        onUploadComplete={fetchFolder}
+                        onOperationComplete={fetchFolder}
                         folderId={folderId}
                     />
                     <CreateFolder
-                        onUploadComplete={fetchFolder}
+                        onOperationComplete={fetchFolder}
                         folderId={folderId}
                     />
                     {/* <TypeMenu /> */}
@@ -79,6 +79,7 @@ function FolderPage() {
                                     <Link to={`/folders/${subfolder._id}`}>
                                         <FolderCard
                                             title={subfolder.title} // TODO: show file details after populating the file object
+                                            onOperationComplete={fetchFolder}
                                         />
                                     </Link>
                                 </div>
@@ -95,6 +96,7 @@ function FolderPage() {
                                         fileId={file._id}
                                         title={file.title} // TODO: show file details after populating the file object
                                         type={file.resourceType}
+                                        onOperationComplete={fetchFolder}
                                         // thumbnail={file.thumbnail}
                                         // TODO: thumbnail according to file type
                                     />

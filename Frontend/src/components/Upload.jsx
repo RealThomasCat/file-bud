@@ -6,7 +6,7 @@ import fileService from "../services/file.service.js";
 import { updateStorageUsed } from "../store/userSlice.js";
 import { useDispatch } from "react-redux";
 
-function Upload({ onUploadComplete, folderId }) {
+function Upload({ onOperationComplete, folderId }) {
     const dispatch = useDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const [file, setFile] = useState(null);
@@ -30,7 +30,7 @@ function Upload({ onUploadComplete, folderId }) {
             }
 
             setIsOpen(false);
-            onUploadComplete();
+            onOperationComplete();
             return response;
         } catch (error) {
             console.log(error);

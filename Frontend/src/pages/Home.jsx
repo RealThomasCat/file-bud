@@ -5,7 +5,7 @@ import {
     Upload,
     FolderCard,
 } from "../components/index.js";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import folderService from "../services/folder.service.js";
 import { Link } from "react-router-dom";
 import CreateFolder from "../components/CreateFolder.jsx";
@@ -58,11 +58,11 @@ function Home() {
 
                 <div className="w-fit h-full flex gap-4">
                     <Upload
-                        onUploadComplete={fetchFolder}
+                        onOperationComplete={fetchFolder}
                         folderId={rootFolderId}
                     />
                     <CreateFolder
-                        onUploadComplete={fetchFolder}
+                        onOperationComplete={fetchFolder}
                         folderId={rootFolderId}
                     />
                     {/* <TypeMenu /> */}
@@ -80,6 +80,7 @@ function Home() {
                                     <Link to={`/folders/${subfolder._id}`}>
                                         <FolderCard
                                             title={subfolder.title} // TODO: show file details after populating the file object
+                                            onOperationComplete={fetchFolder}
                                         />
                                     </Link>
                                 </div>
@@ -94,10 +95,10 @@ function Home() {
                                 <div key={file._id}>
                                     <FileCard
                                         fileId={file._id}
-                                        title={file.title} // TODO: show file details after populating the file object
+                                        title={file.title}
                                         type={file.resourceType}
-                                        // thumbnail={file.thumbnail}
-                                        // TODO: thumbnail according to file type
+                                        onOperationComplete={fetchFolder}
+                                        // TODO: default thumbnail according to file type
                                     />
                                 </div>
                             ))}

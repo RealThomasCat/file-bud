@@ -4,7 +4,7 @@ import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { MainButton, PrimaryButton } from "./index.js";
 import folderService from "../services/folder.service.js";
 
-function CreateFolder({ onUploadComplete, folderId }) {
+function CreateFolder({ onOperationComplete, folderId }) {
     const [isOpen, setIsOpen] = useState(false);
     const [title, setTitle] = useState(null);
 
@@ -13,8 +13,7 @@ function CreateFolder({ onUploadComplete, folderId }) {
             // console.log(folderId); // DEBUGGING
             const response = await folderService.createFolder(folderId, title);
             setIsOpen(false);
-            onUploadComplete();
-            return response;
+            onOperationComplete();
         } catch (error) {
             console.log(error);
         }

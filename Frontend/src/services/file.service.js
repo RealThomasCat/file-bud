@@ -30,14 +30,16 @@ const fetchFile = (fileId) => {
     return axios.get(`${API_URL}/fetch`, { params: { fileId } });
 };
 
-// export const deleteFile = async (fileId) => {
-//     const response = await axios.delete(`${API_URL}/${fileId}`);
-//     return response.data;
-// };
+const deleteFile = (fileId) => {
+    return axios.delete(`${API_URL}/delete`, {
+        data: { fileId },
+    });
+};
 
 export default {
     fetchThumbnail,
     uploadFile,
     downloadFile,
     fetchFile,
+    deleteFile,
 };

@@ -26,7 +26,7 @@ function Header() {
     return (
         <Container>
             <header className="h-28 py-6">
-                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass border border-borderCol border-opacity-15">
+                <nav className="w-full h-full flex justify-between items-center p-3 rounded-full bg-glass">
                     <div className="flex justify-center items-center gap-3">
                         {/* Logo */}
                         <Link to="/home">

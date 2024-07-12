@@ -5,10 +5,16 @@ import imageIcon from "../assets/ImageIcon.svg";
 import videoIcon from "../assets/VideoIcon.svg";
 import fileIcon from "../assets/FileIcon.svg";
 import downloadIcon from "../assets/DownloadIcon.svg";
+import deleteIcon from "../assets/DeleteIcon.svg";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import fileService from "../services/file.service.js";
 
-function FileCard({ title = "File Name", type = "image", fileId }) {
+function FileCard({
+    title = "File Name",
+    type = "image",
+    fileId,
+    onOperationComplete,
+}) {
     const [file, setFile] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -30,7 +36,7 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
                 setIsOpen(true);
                 const response = await fileService.fetchFile(fileId);
                 setFile(response.data.data.signed_url);
-                console.log(response.data.data.signed_url); // DEBUGGING
+                // console.log(response.data.data.signed_url); // DEBUGGING
                 return response;
             } catch (error) {
                 console.log(error);
@@ -38,11 +44,24 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
         }
     };
 
+    const handleDelete = async () => {
+        try {
+            const response = await fileService.deleteFile(fileId);
+
+            if (response.status === 200) {
+                setIsOpen(false);
+                onOperationComplete();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <>
             <div
                 onDoubleClick={showFile}
-                className="aspect-square text-textCol flex flex-col gap-3 bg-glass border border-borderCol border-opacity-15 p-2 rounded-lg overflow-hidden"
+                className="aspect-square text-textCol flex flex-col gap-3 bg-glass p-2 rounded-lg overflow-hidden"
             >
                 <div className="w-full flex justify-between items-center pl-1">
                     <div className="w-full h-full flex items-center gap-2 overflow-hidden">
@@ -98,10 +117,17 @@ function FileCard({ title = "File Name", type = "image", fileId }) {
                                 {/* TODO: Height of this width is 38 but it should be 40 */}
                                 <div className="h-full flex gap-3">
                                     <MainButton
+                                        title="Delete"
+                                        icon={deleteIcon}
+                                        action={handleDelete}
+                                    />
+
+                                    <MainButton
                                         title="Download"
                                         icon={downloadIcon}
                                         action={handleDownload}
                                     />
+
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         className="h-full aspect-square w-fit rounded-full border border-borderCol border-opacity-15"
