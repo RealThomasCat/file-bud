@@ -15,7 +15,7 @@ function App() {
     }, [dispatch]);
 
     return loading ? ( // TODO: !loading
-        <div className="min-h-screen flex flex-wrap content-between bg-bgCol">
+        <div className="min-h-screen px-6 flex flex-wrap content-between bg-bgCol">
             <div className="w-full block">
                 <Header />
                 <main>
