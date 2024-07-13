@@ -6,6 +6,7 @@ import {
     downloadFile,
     deleteFile,
     fileThumbnail,
+    streamVideo,
 } from "../controllers/file.controller.js";
 import {
     multerErrorHandler,
@@ -18,6 +19,7 @@ const router = Router();
 // Routes
 // Secured routes
 router.route("/fetch").get(verifyJWT, fetchFile);
+router.route("/stream").get(verifyJWT, streamVideo);
 router.route("/upload").post(
     verifyJWT,
     upload.single("file"),

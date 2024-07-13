@@ -96,7 +96,7 @@ const cloudinaryUrlProvider = (publicId, resource_type) => {
     });
 };
 
-// Provides TIME LIMITED signed url for authenticated uploads
+// Provides TIME LIMITED downloadable signed url for authenticated uploads
 const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
     const options = {
         type: "authenticated", // Use 'authenticated' type for private videos
@@ -108,7 +108,7 @@ const cloudinaryPrivateDownloadUrl = (publicId, resource_type, format) => {
     return cloudinary.utils.private_download_url(publicId, format, options);
 };
 
-// Provides TIME LIMITED signed url for authenticated uploads
+// Provides TIME LIMITED streamable signed url for authenticated uploads
 const cloudinaryPrivateStreamUrl = (publicId, resource_type, format) => {
     const options = {
         type: "authenticated", // Use 'authenticated' type for private videos
@@ -117,6 +117,21 @@ const cloudinaryPrivateStreamUrl = (publicId, resource_type, format) => {
     };
 
     return cloudinary.utils.private_download_url(publicId, format, options);
+};
+
+// Provides m3u8 file signed url for HLS streaming authenticated video uploads
+const cloudinaryVideoStreamUrl = (publicId) => {
+    const options = {
+        resource_type: "video",
+        type: "authenticated", // Use 'authenticated' type for private videos
+        streaming_profile: "hd",
+        format: "m3u8",
+        secure: true,
+        sign_url: true,
+        // flags: 'attachment'  //Just add this if you want to download the file
+    };
+
+    return cloudinary.url(publicId, options);
 };
 
 // Provides signed url for thumnail of authenticated uploads
@@ -154,4 +169,5 @@ export {
     cloudinaryPrivateDownloadUrl,
     cloudinaryThumbnailUrl,
     cloudinaryPrivateStreamUrl,
+    cloudinaryVideoStreamUrl,
 };

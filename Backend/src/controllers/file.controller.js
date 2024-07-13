@@ -16,6 +16,7 @@ import {
     cloudinaryPrivateDownloadUrl,
     cloudinaryThumbnailUrl,
     cloudinaryPrivateStreamUrl,
+    cloudinaryVideoStreamUrl,
 } from "../utils/cloudinary.js";
 
 // Get the directory path of the current module using import.meta.url
@@ -56,7 +57,49 @@ const fetchFile = asyncHandler(async (req, res) => {
 
     // res.redirect(signed_url);
     res.status(200).json(
-        new ApiResponse(200, { signed_url: signed_url }, "File uploaded")
+        new ApiResponse(
+            200,
+            { signed_url: signed_url },
+            "URL to access the resource"
+        )
+    );
+});
+
+// Function to provide signed_url for mru8 file for HLS streaming
+const streamVideo = asyncHandler(async (req, res) => {
+    const { fileId } = req.query;
+
+    console.log("File ID", fileId); //DEBUGGING
+
+    const requestedFile = await File.findById(fileId);
+    // console.log(_id);
+    console.log(requestedFile);
+
+    // If user exists then throw error
+    if (!requestedFile) {
+        throw new ApiError(409, "File does not Exist");
+    }
+
+    // Check if requested file belongs to user, if not throw error
+    if (requestedFile.ownerId.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "Unauthorized access");
+    }
+
+    // Check if requested file is a video, if not throw error
+    if (requestedFile.resourceType !== "video") {
+        throw new ApiError(403, "Requested resource is not a video");
+    }
+
+    const signed_url = cloudinaryVideoStreamUrl(requestedFile.publicId);
+    console.log("signed url", signed_url); //DEBUGGING
+
+    // res.redirect(signed_url);
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            { signed_url: signed_url },
+            "URL to access the m3u8 file for the video"
+        )
     );
 });
 
@@ -379,4 +422,11 @@ const fileThumbnail = asyncHandler(async (req, res) => {
     res.redirect(signed_url);
 });
 
-export { fetchFile, uploadFile, downloadFile, deleteFile, fileThumbnail };
+export {
+    fetchFile,
+    uploadFile,
+    downloadFile,
+    deleteFile,
+    fileThumbnail,
+    streamVideo,
+};
