@@ -5,8 +5,8 @@ export default {
         extend: {
             colors: {
                 primary: "#828FFF",
-                bgCol: "#151515",
-                glass: "#2A2A2A",
+                bgCol: "#131313",
+                glass: "#212121",
                 borderCol: "#FFFFFF",
                 textCol: "#EFEFEF",
             },

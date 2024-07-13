@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { logoutUser } from "../../store/userSlice.js";
 import {
     Container,
@@ -55,7 +55,7 @@ function Header() {
                         {authStatus && (
                             <>
                                 {location.pathname !== "/" && (
-                                    <div className="h-full w-40 text-lg flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary">
+                                    <div className="h-full w-40 text-base flex justify-center items-center rounded-full text-primary font-medium border-2 border-primary">
                                         <h1 className="text-primary">
                                             {(
                                                 storageUsed /

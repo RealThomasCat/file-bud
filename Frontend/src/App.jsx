@@ -12,9 +12,10 @@ function App() {
 
     useEffect(() => {
         dispatch(getUser());
+        setLoading(false);
     }, [dispatch]);
 
-    return loading ? ( // TODO: !loading
+    return !loading ? (
         <div className="min-h-screen px-6 flex flex-wrap content-between bg-bgCol">
             <div className="w-full block">
                 <Header />

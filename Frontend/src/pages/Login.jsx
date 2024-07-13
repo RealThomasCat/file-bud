@@ -12,7 +12,6 @@ const Login = () => {
     const [password, setPassword] = useState("");
 
     const dispatch = useDispatch();
-    const authStatus = useSelector((state) => state.user.user);
 
     const handleLogin = () => {
         dispatch(loginUser({ email, password }));

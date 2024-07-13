@@ -4,7 +4,7 @@ function SecondaryButton({ title, action }) {
     return (
         <button
             onClick={action}
-            className="h-full w-40 rounded-full text-lg text-primary font-medium border-2 border-primary pb-0.5"
+            className="h-full w-40 rounded-full text-base text-primary font-medium border-2 border-primary uppercase"
         >
             {title}
         </button>

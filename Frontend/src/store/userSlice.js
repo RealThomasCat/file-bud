@@ -6,7 +6,7 @@ export const loginUser = createAsyncThunk(
     async ({ email, password }, thunkAPI) => {
         try {
             const response = await userService.login(email, password);
-            // console.log(response.data); // DEBUGGING
+            console.log(response.data); // DEBUGGING
             return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.message);
@@ -51,7 +51,7 @@ const userSlice = createSlice({
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.user = action.payload;
+                state.user = action.payload.data.user;
                 state.rootFolderId = action.payload.data.user.rootFolder;
                 state.storageUsed = action.payload.data.user.storageUsed;
                 state.maxStorage = action.payload.data.user.maxStorage;
@@ -69,7 +69,7 @@ const userSlice = createSlice({
             })
             .addCase(getUser.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.user = action.payload;
+                state.user = action.payload.data;
                 state.rootFolderId = action.payload.data.rootFolder;
                 state.storageUsed = action.payload.data.storageUsed;
                 state.maxStorage = action.payload.data.maxStorage;
