@@ -50,9 +50,12 @@ function FileCard({
             try {
                 setImageLoading(true);
                 setIsOpen(true);
-                const response = await fileService.fetchFile(fileId);
-                setFile(response.data.data.signed_url);
-                // console.log(response.data.data.signed_url); // DEBUGGING
+                // if file URL is already present then fetch the image from the disk cache
+                if (!file) {
+                    const response = await fileService.fetchFile(fileId);
+                    setFile(response.data.data.signed_url);
+                    // console.log(response.data.data.signed_url); // DEBUGGING
+                }
             } catch (error) {
                 console.log(error);
             }
