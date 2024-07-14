@@ -48,10 +48,26 @@ const fetchFile = asyncHandler(async (req, res) => {
         throw new ApiError(403, "Unauthorized access");
     }
 
+    let expires_at = requestedFile.urlExpiresAt;
+
+    console.log("requestedFile.urlExpiresAt", requestedFile.urlExpiresAt); //DEBUGGING
+    console.log("Time in Seconds Right Now-", Math.floor(Date.now() / 1000)); //DEBUGGING
+
+    if (
+        !requestedFile.urlExpiresAt ||
+        requestedFile.urlExpiresAt < Math.floor(Date.now() / 1000)
+    ) {
+        expires_at = Math.floor(Date.now() / 1000) + 3600; // URL expires in 1hr
+
+        requestedFile.urlExpiresAt = expires_at; // Update the urlExpiresAt field
+        await requestedFile.save(); // Save the changes
+    }
+
     const signed_url = cloudinaryPrivateStreamUrl(
         requestedFile.publicId,
         requestedFile.resourceType,
-        requestedFile.format
+        requestedFile.format,
+        expires_at
     );
     console.log("signed url", signed_url); //DEBUGGING
 

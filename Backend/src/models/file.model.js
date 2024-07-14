@@ -41,6 +41,9 @@ const fileSchema = new Schema(
             type: String,
             required: true,
         },
+        urlExpiresAt: {
+            type: Number,
+        },
     },
     {
         timeStamps: true,
