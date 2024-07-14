@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import axios from "axios";
 import mongoose from "mongoose";
 import { File } from "../models/file.model.js";
@@ -19,14 +20,15 @@ import {
     cloudinaryVideoStreamUrl,
 } from "../utils/cloudinary.js";
 
-// Get the directory path of the current module using import.meta.url
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Define the path to the log file
-const logFilePath = path.join(
+// Resolve the log file path correctly
+const logFilePath = path.resolve(
     __dirname,
     "../../logs/cloudinary_delete_log.txt"
 );
+// console.log(logFilePath); //DEBUGGING
 
 // FETCH FILE ???
 const fetchFile = asyncHandler(async (req, res) => {
@@ -61,6 +63,7 @@ const fetchFile = asyncHandler(async (req, res) => {
 
         requestedFile.urlExpiresAt = expires_at; // Update the urlExpiresAt field
         await requestedFile.save(); // Save the changes
+        console.log("URL is changed this time"); //DEBUGGING
     }
 
     const signed_url = cloudinaryPrivateStreamUrl(
@@ -367,7 +370,7 @@ const deleteFile = asyncHandler(async (req, res) => {
             });
 
         // Extract Cloudinary publicId before deleting the file document
-        const cloudinaryPublicId = fileToDelete.publicId;
+        const cloudinaryPublicId = [fileToDelete.publicId];
 
         // Delete the file document itself
         await File.deleteOne({ _id: fileId })
@@ -382,10 +385,16 @@ const deleteFile = asyncHandler(async (req, res) => {
 
         // Attempt to delete the file from Cloudinary
         try {
-            await deleteFromCloudinary(cloudinaryPublicId);
+            await deleteFromCloudinary(
+                cloudinaryPublicId,
+                fileToDelete.resourceType
+            );
         } catch (error) {
             // Log the error and retry later
-            fs.appendFileSync(logFilePath, cloudinaryPublicId + "\n");
+            fs.appendFileSync(
+                logFilePath,
+                `${fileToDelete.resourceType}: ${cloudinaryPublicId[0]}\n`
+            );
         }
 
         res.status(200).json(

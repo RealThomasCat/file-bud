@@ -60,32 +60,41 @@ const downloadFromCloudinary = async (fileURL) => {
     }
 };
 
-// DELETE FILE FROM CLOUDINARY (TODO: TEST) DOUBT: fileURL or public_id?
-const deleteFromCloudinary = async (fileURL) => {
-    let attempt = 0;
-    while (attempt < MAX_RETRIES) {
-        try {
-            if (!fileURL) return null;
+// ***OLD*** DELETE FILE FROM CLOUDINARY (TODO: TEST) DOUBT: fileURL or public_id?
+// const deleteFromCloudinary = async (fileURL) => {
+//     let attempt = 0;
+//     while (attempt < MAX_RETRIES) {
+//         try {
+//             if (!fileURL) return null;
 
-            // Fetch the file from cloudinary
-            const response = await cloudinary.uploader.destroy(fileURL);
+//             // Fetch the file from cloudinary
+//             const response = await cloudinary.uploader.destroy(fileURL);
 
-            return response;
-        } catch (error) {
-            attempt++;
-            if (attempt < MAX_RETRIES) {
-                console.error(
-                    `Attempt ${attempt} to delete file failed, retrying...`
-                );
-                await new Promise((resolve) =>
-                    setTimeout(resolve, RETRY_DELAY)
-                );
-            } else {
-                console.error("All attempts to delete the file failed");
-                throw new Error("Failed to delete file from Cloudinary");
-            }
-        }
-    }
+//             return response;
+//         } catch (error) {
+//             attempt++;
+//             if (attempt < MAX_RETRIES) {
+//                 console.error(
+//                     `Attempt ${attempt} to delete file failed, retrying...`
+//                 );
+//                 await new Promise((resolve) =>
+//                     setTimeout(resolve, RETRY_DELAY)
+//                 );
+//             } else {
+//                 console.error("All attempts to delete the file failed");
+//                 throw new Error("Failed to delete file from Cloudinary");
+//             }
+//         }
+//     }
+// };
+
+// ***NEW*** DELETE A SINGLE FILE or AN ARRAY OF FILES (of same resource_type) FROM CLOUDINARY
+const deleteFromCloudinary = async (publicIds, resourceType) => {
+    const result = await cloudinary.api.delete_resources(publicIds, {
+        type: "authenticated",
+        resource_type: resourceType,
+    });
+    // console.log("Files deleted:", result); //DEBUGGING
 };
 
 // Provides signed url for authenticated uploads

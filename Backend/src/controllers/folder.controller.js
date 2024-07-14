@@ -8,16 +8,16 @@ import { File } from "../models/file.model.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-// Get the directory path of the current module using import.meta.url
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Define the path to the log file
-const logFilePath = path.join(
+// Resolve the log file path correctly
+const logFilePath = path.resolve(
     __dirname,
     "../../logs/cloudinary_delete_log.txt"
 );
-// console.log(logFilePath)
 
 // FETCH FOLDER
 const fetchFolder = asyncHandler(async (req, res) => {
@@ -103,6 +103,7 @@ const createFolder = asyncHandler(async (req, res) => {
                 {
                     title: newTitle,
                     ownerId: req.user._id,
+                    parentFolder: currFolderId,
                 },
             ],
             { session }
@@ -136,7 +137,6 @@ const createFolder = asyncHandler(async (req, res) => {
 // DELETE FOLDER
 const deleteFolder = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
-    session.startTransaction();
 
     try {
         const { folderId } = req.body; // Assuming folderId is sent in the body
@@ -169,14 +169,33 @@ const deleteFolder = asyncHandler(async (req, res) => {
         const filesToDelete = folderToDelete.files;
         const subfoldersToDelete = folderToDelete.subfolders;
 
-        // Prepare an array to collect all publicIds to be deleted from Cloudinary later
-        let cloudinaryPublicIds = filesToDelete.map((file) => file.publicId);
+        // Prepare arrays to collect publicIds to be deleted from Cloudinary later
+        let imagePublicIds = [];
+        let videoPublicIds = [];
+        let rawPublicIds = [];
+
+        // Function to categorize publicIds based on resourceType
+        const categorizePublicId = (file) => {
+            if (file.resourceType === "image") {
+                imagePublicIds.push(file.publicId);
+            } else if (file.resourceType === "video") {
+                videoPublicIds.push(file.publicId);
+            } else if (file.resourceType === "raw") {
+                rawPublicIds.push(file.publicId);
+            }
+        };
 
         // Calculate total size of all files to be deleted
         let totalSizeToDelete = filesToDelete.reduce(
             (total, file) => total + file.size,
             0
         );
+
+        // Categorize publicIds of the main folder files
+        filesToDelete.forEach(categorizePublicId);
+
+        // Start the transaction
+        session.startTransaction();
 
         // Delete all files metadata if there are any files to delete
         if (filesToDelete.length > 0) {
@@ -195,16 +214,14 @@ const deleteFolder = asyncHandler(async (req, res) => {
                 const subfolderFiles = subfolderDetails.files;
                 const nestedSubfolders = subfolderDetails.subfolders;
 
-                // Collect cloudinary publicIds from subfolder files
-                cloudinaryPublicIds.push(
-                    ...subfolderFiles.map((file) => file.publicId)
-                );
-
                 // Calculate total size of subfolder files to be deleted
                 totalSizeToDelete += subfolderFiles.reduce(
                     (total, file) => total + file.size,
                     0
                 );
+
+                // Categorize publicIds from subfolder files
+                subfolderFiles.forEach(categorizePublicId);
 
                 // Delete subfolder files metadata if there are any files to delete
                 if (subfolderFiles.length > 0) {
@@ -227,6 +244,8 @@ const deleteFolder = asyncHandler(async (req, res) => {
         // Delete the main folder metadata
         await Folder.deleteOne({ _id: folderId }).session(session);
 
+        // console.log("folderToDelete.parentFolder", folderToDelete.parentFolder); //DEBUGGING
+
         // Remove folderId from the parent folder's subfolders array
         await Folder.updateOne(
             { _id: folderToDelete.parentFolder },
@@ -243,15 +262,23 @@ const deleteFolder = asyncHandler(async (req, res) => {
         await session.commitTransaction();
         session.endSession();
 
-        // Attempt to delete files from Cloudinary
-        for (const publicId of cloudinaryPublicIds) {
+        // Function to attempt to delete files from Cloudinary
+        const attemptDeleteFromCloudinary = async (publicIds, resourceType) => {
+            if (publicIds.length === 0) return;
+
             try {
-                await deleteFromCloudinary(publicId);
+                await deleteFromCloudinary(publicIds, resourceType);
             } catch (error) {
                 // Log the error and retry later
-                fs.appendFileSync(logFilePath, publicId + "\n");
+                let logMessage = `${resourceType}: ${publicIds.join(" ")}\n`;
+                fs.appendFileSync(logFilePath, logMessage);
             }
-        }
+        };
+
+        // Attempt to delete files from Cloudinary for each resourceType
+        await attemptDeleteFromCloudinary(imagePublicIds, "image");
+        await attemptDeleteFromCloudinary(videoPublicIds, "video");
+        await attemptDeleteFromCloudinary(rawPublicIds, "raw");
 
         res.status(200).json({
             message: "Folder and its contents deleted successfully",
