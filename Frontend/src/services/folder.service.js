@@ -13,7 +13,14 @@ const createFolder = (currFolderId, title) => {
     return axios.post(`${API_URL}/create`, { currFolderId, title });
 };
 
+const deleteFolder = (folderId) => {
+    return axios.delete(`${API_URL}/delete`, {
+        data: { folderId },
+    });
+};
+
 export default {
     fetchFolder,
     createFolder,
+    deleteFolder,
 };

@@ -9,24 +9,16 @@ import deleteIcon from "../assets/DeleteIcon.svg";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import fileService from "../services/file.service.js";
 
-function FileCard({
-    title = "File Name",
-    type = "image",
-    fileId,
-    onOperationComplete,
-}) {
-    const [file, setFile] = useState(null);
+function FileCard({ file, onOperationComplete }) {
+    const [fileUrl, setFileUrl] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
 
     const handleDownload = async () => {
         try {
-            console.log(fileId); // DEBUGGING
-            const response = await fileService.downloadFile(fileId);
+            // console.log(file._id); // DEBUGGING
+            const response = await fileService.downloadFile(file._id);
             console.log(response.data.data); // DEBUGGING
-
-            // Open download link in new tab
-            // window.open(`${response.data.data.signed_url}`, "_blank");
 
             // Create a temporary anchor element
             const link = document.createElement("a");
@@ -46,14 +38,14 @@ function FileCard({
     };
 
     const showFile = async () => {
-        if (type === "image") {
+        if (file.resourceType === "image") {
             try {
                 setImageLoading(true);
                 setIsOpen(true);
                 // if file URL is already present then fetch the image from the disk cache
-                if (!file) {
-                    const response = await fileService.fetchFile(fileId);
-                    setFile(response.data.data.signed_url);
+                if (!fileUrl) {
+                    const response = await fileService.fetchFile(file._id);
+                    setFileUrl(response.data.data.signed_url);
                     // console.log(response.data.data.signed_url); // DEBUGGING
                 }
             } catch (error) {
@@ -64,7 +56,7 @@ function FileCard({
 
     const handleDelete = async () => {
         try {
-            const response = await fileService.deleteFile(fileId);
+            const response = await fileService.deleteFile(file._id);
 
             if (response.status === 200) {
                 setIsOpen(false);
@@ -73,6 +65,10 @@ function FileCard({
         } catch (error) {
             console.log(error);
         }
+    };
+
+    const showDetails = async () => {
+        console.log("Details");
     };
 
     return (
@@ -87,9 +83,9 @@ function FileCard({
                             <img
                                 className="h-full w-full object-contain"
                                 src={
-                                    type === "image"
+                                    file.resourceType === "image"
                                         ? imageIcon
-                                        : type === "video"
+                                        : file.resourceType === "video"
                                           ? videoIcon
                                           : fileIcon
                                 }
@@ -98,11 +94,17 @@ function FileCard({
                         </div>
 
                         <h1 className="w-4/5 line-clamp-1 text-ellipsis overflow-hidden">
-                            {title}
+                            {file.title}
                         </h1>
                     </div>
 
-                    <OptionsButton />
+                    <OptionsButton
+                        type="file"
+                        file={file}
+                        handleDownload={handleDownload}
+                        handleDelete={handleDelete}
+                        showDetails={showDetails}
+                    />
                 </div>
 
                 {/* Thumbnail */}
@@ -110,8 +112,10 @@ function FileCard({
                     <img
                         // src={thumbnailLink ? thumbnailLink : defaultThumbnail}
                         src={
-                            fileId && (type === "image" || type === "video")
-                                ? `http://localhost:8000/api/v1/files/thumbnail/${fileId}`
+                            file._id &&
+                            (file.resourceType === "image" ||
+                                file.resourceType === "video")
+                                ? `http://localhost:8000/api/v1/files/thumbnail/${file._id}`
                                 : defaultThumbnail
                         }
                         loading="lazy"
@@ -134,7 +138,7 @@ function FileCard({
                         {/* Header */}
                         <div className="fixed max-h-24 min-h-24 h-24 max-w-7xl w-full p-4 top-0 text-xl">
                             <div className="w-full h-full p-3 flex justify-between items-center bg-glass text-xl rounded-full text-textCol text-center">
-                                <div className="px-4">{title}</div>
+                                <div className="px-4">{file.title}</div>
 
                                 {/* TODO: Height of this width is 38 but it should be 40 */}
                                 <div className="h-full flex gap-3">
@@ -171,8 +175,8 @@ function FileCard({
                         >
                             <img
                                 // TODO: Fetch file from backend
-                                src={file}
-                                alt={title}
+                                src={fileUrl}
+                                alt={file.title}
                                 className="h-full object-contain"
                                 onLoad={() => setImageLoading(false)}
                             />

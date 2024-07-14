@@ -7,7 +7,6 @@ import {
 } from "../components/index.js";
 import { useSelector } from "react-redux";
 import folderService from "../services/folder.service.js";
-import { Link } from "react-router-dom";
 import CreateFolder from "../components/CreateFolder.jsx";
 
 function Home() {
@@ -74,15 +73,13 @@ function Home() {
                 <div className="flex flex-col gap-2">
                     {/* Folders */}
                     {subfolders && subfolders.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 py-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 py-4">
                             {subfolders.map((subfolder) => (
                                 <div key={subfolder._id}>
-                                    <Link to={`/folders/${subfolder._id}`}>
-                                        <FolderCard
-                                            title={subfolder.title} // TODO: show file details after populating the file object
-                                            onOperationComplete={fetchFolder}
-                                        />
-                                    </Link>
+                                    <FolderCard
+                                        folder={subfolder}
+                                        onOperationComplete={fetchFolder}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -90,10 +87,11 @@ function Home() {
 
                     {/* Files */}
                     {files && files.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 py-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 py-4">
                             {files.map((file) => (
                                 <div key={file._id}>
                                     <FileCard
+                                        file={file}
                                         fileId={file._id}
                                         title={file.title}
                                         type={file.resourceType}

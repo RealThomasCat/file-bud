@@ -73,15 +73,13 @@ function FolderPage() {
                 <div className="flex flex-col gap-2">
                     {/* Folders */}
                     {subfolders && subfolders.length > 0 && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 py-4">
                             {subfolders.map((subfolder) => (
                                 <div key={subfolder._id}>
-                                    <Link to={`/folders/${subfolder._id}`}>
-                                        <FolderCard
-                                            title={subfolder.title} // TODO: show file details after populating the file object
-                                            onOperationComplete={fetchFolder}
-                                        />
-                                    </Link>
+                                    <FolderCard
+                                        folder={subfolder}
+                                        onOperationComplete={fetchFolder}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -89,16 +87,12 @@ function FolderPage() {
 
                     {/* Files */}
                     {files && files.length > 0 && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 py-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 py-4">
                             {files.slice(0, 20).map((file) => (
                                 <div key={file._id}>
                                     <FileCard
-                                        fileId={file._id}
-                                        title={file.title} // TODO: show file details after populating the file object
-                                        type={file.resourceType}
+                                        file={file}
                                         onOperationComplete={fetchFolder}
-                                        // thumbnail={file.thumbnail}
-                                        // TODO: thumbnail according to file type
                                     />
                                 </div>
                             ))}
