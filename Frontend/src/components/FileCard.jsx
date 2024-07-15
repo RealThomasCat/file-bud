@@ -8,10 +8,13 @@ import downloadIcon from "../assets/DownloadIcon.svg";
 import deleteIcon from "../assets/DeleteIcon.svg";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import fileService from "../services/file.service.js";
+import Player from "./Player.jsx";
 
 function FileCard({ file, onOperationComplete }) {
     const [fileUrl, setFileUrl] = useState(null);
+    const [videoUrl, setVideoUrl] = useState(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [isPlayerOpen, setIsPlayerOpen] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
 
     const handleDownload = async () => {
@@ -54,6 +57,19 @@ function FileCard({ file, onOperationComplete }) {
         }
     };
 
+    const playVideo = async () => {
+        if (file.resourceType === "video") {
+            try {
+                const response = await fileService.streamVideo(file._id);
+                console.log(response.data.data.signed_url); // DEBUGGING
+                setVideoUrl(response.data.data.signed_url);
+                setIsPlayerOpen(true);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    };
+
     const handleDelete = async () => {
         try {
             const response = await fileService.deleteFile(file._id);
@@ -74,7 +90,13 @@ function FileCard({ file, onOperationComplete }) {
     return (
         <>
             <div
-                onDoubleClick={showFile}
+                onDoubleClick={
+                    file.resourceType === "image"
+                        ? showFile
+                        : file.resourceType === "video"
+                          ? playVideo
+                          : null
+                }
                 className="aspect-square text-textCol flex flex-col gap-3 bg-glass p-2 rounded-lg overflow-hidden"
             >
                 <div className="w-full flex justify-between items-center pl-1">
@@ -181,6 +203,20 @@ function FileCard({ file, onOperationComplete }) {
                                 onLoad={() => setImageLoading(false)}
                             />
                         </div>
+                    </DialogPanel>
+                </div>
+            </Dialog>
+
+            <Dialog
+                open={isPlayerOpen}
+                onClose={() => {
+                    setIsPlayerOpen(false);
+                }}
+                className="z-50"
+            >
+                <div className="fixed inset-0 flex flex-col w-screen items-center justify-center mx-auto bg-black bg-opacity-75">
+                    <DialogPanel className="w-[64rem] max-w-5xl">
+                        <Player file={file} videoUrl={videoUrl} />
                     </DialogPanel>
                 </div>
             </Dialog>

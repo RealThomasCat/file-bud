@@ -36,10 +36,15 @@ const deleteFile = (fileId) => {
     });
 };
 
+const streamVideo = (fileId) => {
+    return axios.get(`${API_URL}/stream`, { params: { fileId } });
+};
+
 export default {
     fetchThumbnail,
     uploadFile,
     downloadFile,
     fetchFile,
     deleteFile,
+    streamVideo,
 };

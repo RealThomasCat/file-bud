@@ -11,6 +11,8 @@ import {
 } from "../index.js";
 
 function Header() {
+    console.log("Hello from Header.jsx"); // DEBUGGING
+
     // Get the user authentication status from the redux store
     const location = useLocation();
     const dispatch = useDispatch();
