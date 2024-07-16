@@ -16,6 +16,10 @@ function OptionsButton({ type, file, folder, handleDownload, handleDelete }) {
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
 
+        if (secs < 10) {
+            return `${hrs > 0 ? `${hrs}:` : "00:"}${mins > 0 ? `${mins}:` : "00:"}0${secs.toFixed(0)}`.trim();
+        }
+
         return `${hrs > 0 ? `${hrs}:` : "00:"}${mins > 0 ? `${mins}:` : "00:"}${secs > 0 ? `${secs.toFixed(0)}` : "00"}`.trim();
     };
 
@@ -38,7 +42,7 @@ function OptionsButton({ type, file, folder, handleDownload, handleDelete }) {
                 </div>
                 <MenuItems
                     anchor="bottom start"
-                    className="w-56 bg-glass py-2 rounded text-textCol flex flex-col gap-0 shadow-[0_0px_10px_0px_rgba(0,0,0,0.5)]"
+                    className="w-56 bg-glass py-2 rounded text-textCol flex flex-col gap-0 shadow-[0_0px_10px_0px_rgba(0,0,0,0.5)] overflow-hidden"
                 >
                     {file && (
                         <MenuItem>
@@ -58,45 +62,38 @@ function OptionsButton({ type, file, folder, handleDownload, handleDelete }) {
                             Delete
                         </button>
                     </MenuItem>
-                    <Disclosure>
-                        <DisclosureButton className="block text-left hover:bg-hoverCol px-3 py-1">
-                            Details
-                        </DisclosureButton>
-                        <DisclosurePanel className="block text-left text-sm font-light text-opacity-40 px-3 pt-3 pb-1">
-                            {type === "file" && file ? (
-                                <div className="flex flex-col gap-2">
-                                    <p>Name: {file.title}</p>
-                                    <p>Type: {file.resourceType}</p>
-                                    <p>Format: {file.format}</p>
-                                    <p>
-                                        Size:{" "}
-                                        {(file.size / (1024 * 1024)).toFixed(2)}{" "}
-                                        MB
-                                    </p>
-                                    {file.duration && (
+                    {type === "file" && (
+                        <Disclosure>
+                            <DisclosureButton className="block text-left hover:bg-hoverCol px-3 py-1">
+                                Details
+                            </DisclosureButton>
+                            <DisclosurePanel className="block text-left text-sm font-light text-opacity-40 px-3 pt-3 pb-1 overflow-auto">
+                                {file ? (
+                                    <div className="flex flex-col gap-2">
+                                        <p>Name: {file.title}</p>
+                                        <p>Type: {file.resourceType}</p>
+                                        <p>Format: {file.format}</p>
                                         <p>
-                                            Duration:{" "}
-                                            {formatDuration(file.duration)}
+                                            Size:{" "}
+                                            {(
+                                                file.size /
+                                                (1024 * 1024)
+                                            ).toFixed(2)}{" "}
+                                            MB
                                         </p>
-                                    )}
-                                </div>
-                            ) : type === "folder" && folder ? (
-                                <div className="flex flex-col gap-2">
-                                    <p>Name: {folder.title}</p>
-                                    {/* TODO: Folder Size */}
-                                    <p>
-                                        Size:{" "}
-                                        {(folder.size / (1024 * 1024)).toFixed(
-                                            2
-                                        )}{" "}
-                                        MB
-                                    </p>
-                                </div>
-                            ) : (
-                                <h1>Loading...</h1>
-                            )}
-                        </DisclosurePanel>
-                    </Disclosure>
+                                        {file.duration && (
+                                            <p>
+                                                Duration:{" "}
+                                                {formatDuration(file.duration)}
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <h1>Loading...</h1>
+                                )}
+                            </DisclosurePanel>
+                        </Disclosure>
+                    )}
                 </MenuItems>
             </Menu>
         </div>

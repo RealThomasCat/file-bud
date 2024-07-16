@@ -9,6 +9,7 @@ export const loginUser = createAsyncThunk(
             console.log(response.data); // DEBUGGING
             return response.data;
         } catch (error) {
+            console.log(error.message); // DEBUGGING
             return thunkAPI.rejectWithValue(error.message);
         }
     }
@@ -76,7 +77,7 @@ const userSlice = createSlice({
             })
             .addCase(getUser.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload;
+                // state.error = action.payload;
             });
     },
 });

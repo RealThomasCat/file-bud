@@ -15,7 +15,7 @@ function Account() {
 
     // Render the button with the first letter of the user's name
     return (
-        <button className="h-full aspect-square rounded-full bg-primary text-2xl text-textCol uppercase">
+        <button className="h-full aspect-square rounded-full bg-primary text-xl text-textCol uppercase">
             {firstLetter || "?"} {/* Show '?' as a fallback */}
         </button>
     );

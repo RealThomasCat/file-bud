@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import defaultThumbnail from "../assets/placeholderImage.jpg";
+import defaultThumbnail from "../assets/DefaultThumbnail.png";
 import { MainButton, OptionsButton } from "./index.js";
 import imageIcon from "../assets/ImageIcon.svg";
 import videoIcon from "../assets/VideoIcon.svg";
 import fileIcon from "../assets/FileIcon.svg";
 import downloadIcon from "../assets/DownloadIcon.svg";
 import deleteIcon from "../assets/DeleteIcon.svg";
+import closeIcon from "../assets/CloseIcon.svg";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import fileService from "../services/file.service.js";
 import Player from "./Player.jsx";
@@ -91,7 +92,7 @@ function FileCard({ file, onOperationComplete }) {
         <>
             <div
                 onDoubleClick={
-                    file.resourceType === "image"
+                    file.resourceType === "image" && file.format !== "pdf"
                         ? showFile
                         : file.resourceType === "video"
                           ? playVideo
@@ -160,30 +161,30 @@ function FileCard({ file, onOperationComplete }) {
                         {/* Header */}
                         <div className="fixed max-h-24 min-h-24 h-24 max-w-7xl w-full p-4 top-0 text-xl">
                             <div className="w-full h-full p-3 flex justify-between items-center bg-glass text-xl rounded-full text-textCol text-center">
-                                <div className="px-4">{file.title}</div>
+                                <div className="px-4 pb-0.5">{file.title}</div>
 
                                 {/* TODO: Height of this width is 38 but it should be 40 */}
                                 <div className="h-full flex gap-3">
                                     <MainButton
-                                        title="Delete"
+                                        // title="Download"
+                                        icon={downloadIcon}
+                                        action={handleDownload}
+                                        v2
+                                    />
+
+                                    <MainButton
+                                        // title="Delete"
                                         icon={deleteIcon}
                                         action={handleDelete}
                                         v2
                                     />
 
                                     <MainButton
-                                        title="Download"
-                                        icon={downloadIcon}
-                                        action={handleDownload}
+                                        // title="Close"
+                                        icon={closeIcon}
+                                        action={() => setIsOpen(false)}
                                         v2
                                     />
-
-                                    <button
-                                        onClick={() => setIsOpen(false)}
-                                        className="h-full aspect-square w-fit rounded-full border-2 border-primary "
-                                    >
-                                        X{/* TODO: Replace with icon */}
-                                    </button>
                                 </div>
                             </div>
                         </div>
