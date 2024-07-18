@@ -128,10 +128,12 @@ const uploadFile = asyncHandler(async (req, res) => {
 
     // To keep track if file is uploaded to cloudinary
     let cloudinaryPublicId = null;
+    let isTransactionStarted = false;
+    let uploadedFileResourceType = null;
 
     try {
         // Extract file path, original name and current folder id from request
-        const fileLocalPath = req.file?.path;
+        var fileLocalPath = req.file?.path;
         const originalName = req.file?.originalname;
         const currentFolderId = req.body.folderId;
 
@@ -202,7 +204,7 @@ const uploadFile = asyncHandler(async (req, res) => {
         console.log("Old file local path", fileLocalPath); // DEBUGGING
         console.log("Old file name", originalFileName); // DEBUGGING
 
-        let newFilePath = fileLocalPath;
+        var newFilePath = fileLocalPath;
 
         // Rename the file in the temp folder if the name has changed
         if (newFileName !== originalFileName) {
@@ -213,6 +215,14 @@ const uploadFile = asyncHandler(async (req, res) => {
 
         console.log("New file local path ", newFilePath); // DEBUGGING
         console.log("New file name ", newFileName); // DEBUGGING
+
+        // What if Error occurs before uploading the file to cloudinary ??????
+        // --------------------------------------- FOR DEBUGGING ------------------------------------------
+        // for (let i = 0; i < 1000000000; i++) {
+        //     true;
+        // }
+        // throw Error;
+        // ------------------------------------------------------------------------------------------------
 
         // Upload file to cloudinary
         const uploadedFile = await uploadToCloudinary(
@@ -226,11 +236,18 @@ const uploadFile = asyncHandler(async (req, res) => {
         } else {
             // If file uploaded successfully then set cloudinaryPublicId
             cloudinaryPublicId = uploadedFile.public_id;
+            uploadedFileResourceType = uploadedFile.resource_type;
         }
+
+        // What if Error occurs after file is uploaded to cloudinary
+        // --------------------------------------- FOR DEBUGGING ------------------------------------------
+        // throw Error; //DEBUGGING
+        // ------------------------------------------------------------------------------------------------
 
         // Start transaction after uploading the video because mongoDB allwos only a short span
         // between start and end of a trasaction
         session.startTransaction();
+        isTransactionStarted = true;
 
         // Create new file object in database (Returns array of created files, we need to extract first element)
         const file = await File.create(
@@ -265,25 +282,43 @@ const uploadFile = asyncHandler(async (req, res) => {
         // Commit the transaction and end the session
         await session.commitTransaction();
         session.endSession();
+        isTransactionStarted = false;
 
         const createdFile = file[0].toObject();
+
+        // If we are at this point then newFilePath definitely contains the path
+        // Delete the locally stored file once uploaded to cloudinary
+        fs.unlinkSync(newFilePath);
 
         // Send file object in response
         return res
             .status(200)
             .json(new ApiResponse(200, createdFile, "File uploaded"));
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
+        // console.log(newFilePath, fileLocalPath); //DEBUGGING
+
+        if (newFilePath) {
+            fs.unlinkSync(newFilePath);
+        } else if (fileLocalPath) {
+            fs.unlinkSync(fileLocalPath);
+        }
+
+        if (isTransactionStarted) {
+            await session.abortTransaction();
+            session.endSession();
+        }
 
         // Delete file from cloudinary if uploaded before error (TODO: ENSURE DELTION ALWAYS HAPPENS SUCCESSFULLY)
         if (cloudinaryPublicId) {
             try {
-                await deleteFromCloudinary(cloudinaryPublicId);
+                await deleteFromCloudinary(
+                    cloudinaryPublicId,
+                    uploadedFileResourceType
+                );
             } catch (error) {
-                throw new ApiError(
-                    500,
-                    "Error deleting file, " + error.message
+                fs.appendFileSync(
+                    logFilePath,
+                    `${uploadedFileResourceType}: ${cloudinaryPublicId}\n`
                 );
             }
         }

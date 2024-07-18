@@ -14,6 +14,7 @@ const RETRY_DELAY = 1000; // 1 second
 // UPLOAD FILE TO CLOUDINARY
 const uploadToCloudinary = async (localFilePath, mimeType) => {
     try {
+        // throw Error; //DEBUGGING
         if (!localFilePath) return null;
 
         const response = mimeType.startsWith("video")
@@ -29,10 +30,11 @@ const uploadToCloudinary = async (localFilePath, mimeType) => {
               });
 
         // file has been uploaded successfully
-        fs.unlinkSync(localFilePath);
+        // fs.unlinkSync(localFilePath);
+        // console.log(response); //DEBUGGING
         return response;
     } catch (error) {
-        fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation got failed
+        // fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation got failed
         console.log("Error uploading file to cloudinary", error.message);
         return null;
     }
@@ -90,6 +92,7 @@ const downloadFromCloudinary = async (fileURL) => {
 
 // ***NEW*** DELETE A SINGLE FILE or AN ARRAY OF FILES (of same resource_type) FROM CLOUDINARY
 const deleteFromCloudinary = async (publicIds, resourceType) => {
+    // throw Error; //DEBUGGING
     const result = await cloudinary.api.delete_resources(publicIds, {
         type: "authenticated",
         resource_type: resourceType,
