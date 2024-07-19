@@ -362,13 +362,22 @@ const downloadFile = asyncHandler(async (req, res) => {
 
 // DELETE FILE (TODO: Use ApiError in catch block?)
 const deleteFile = asyncHandler(async (req, res) => {
+    const { fileId } = req.body;
+    const user = req.user; // Authenticated user information
+
+    console.log(req.user); //DEBUGGING
+
+    if (req.user.isAccessLimited) {
+        throw new ApiError(
+            403,
+            "Deletion is not allowed for this user at the moment"
+        );
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-        const { fileId } = req.body;
-        const user = req.user; // Authenticated user information
-
         // Check whether the file with the given ID exists
         const fileToDelete = await File.findById(fileId)
             .exec()

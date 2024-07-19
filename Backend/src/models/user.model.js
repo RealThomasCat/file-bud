@@ -41,6 +41,10 @@ const userSchema = new Schema({
         type: Number,
         default: 1073741824, // 1 GB
     },
+    isAccessLimited: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 // pre-save hook to hash password
@@ -65,6 +69,7 @@ userSchema.methods.generateAccessToken = function () {
             _id: this._id,
             email: this.email,
             rootFolder: this.rootFolder,
+            isAccessLimited: this.isAccessLimited,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
