@@ -157,7 +157,9 @@ const cloudinaryVideoStreamUrl = (publicId) => {
 const cloudinaryThumbnailUrl = (publicId, resource_type, format) => {
     let thumbnailUrl = null;
     if (resource_type === "image" || resource_type === "video") {
-        const transformations = [{ width: 300, height: 300, crop: "scale" }];
+        const transformations = [
+            { width: 300, height: 300, crop: "thumb", gravity: "north" },
+        ];
 
         if (resource_type === "video") {
             transformations.push(
