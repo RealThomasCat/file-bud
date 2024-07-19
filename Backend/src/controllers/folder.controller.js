@@ -137,6 +137,7 @@ const createFolder = asyncHandler(async (req, res) => {
 // DELETE FOLDER
 const deleteFolder = asyncHandler(async (req, res) => {
     const session = await mongoose.startSession();
+    let isTransactionStarted = false;
 
     try {
         const { folderId } = req.body; // Assuming folderId is sent in the body
@@ -196,6 +197,7 @@ const deleteFolder = asyncHandler(async (req, res) => {
 
         // Start the transaction
         session.startTransaction();
+        isTransactionStarted = true;
 
         // Delete all files metadata if there are any files to delete
         if (filesToDelete.length > 0) {
@@ -261,6 +263,7 @@ const deleteFolder = asyncHandler(async (req, res) => {
         // Commit transaction
         await session.commitTransaction();
         session.endSession();
+        isTransactionStarted = false;
 
         // Function to attempt to delete files from Cloudinary
         const attemptDeleteFromCloudinary = async (publicIds, resourceType) => {
@@ -284,8 +287,10 @@ const deleteFolder = asyncHandler(async (req, res) => {
             message: "Folder and its contents deleted successfully",
         });
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
+        if (isTransactionStarted) {
+            await session.abortTransaction();
+            session.endSession();
+        }
         console.error("Error deleting folder:", error);
         res.status(500).json({
             message: "An error occurred while deleting the folder",

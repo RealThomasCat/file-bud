@@ -365,9 +365,9 @@ const deleteFile = asyncHandler(async (req, res) => {
     const { fileId } = req.body;
     const user = req.user; // Authenticated user information
 
-    console.log(req.user); //DEBUGGING
+    // console.log(req.user); //DEBUGGING
 
-    if (req.user.isAccessLimited) {
+    if (user.isAccessLimited) {
         throw new ApiError(
             403,
             "Deletion is not allowed for this user at the moment"
