@@ -136,13 +136,20 @@ const createFolder = asyncHandler(async (req, res) => {
 
 // DELETE FOLDER
 const deleteFolder = asyncHandler(async (req, res) => {
+    const { folderId } = req.body; // Assuming folderId is sent in the body
+    const user = req.user; // Authenticated user information
+
+    if (user.isAccessLimited) {
+        throw new ApiError(
+            403,
+            "Deletion is not allowed for this user at the moment"
+        );
+    }
+
     const session = await mongoose.startSession();
     let isTransactionStarted = false;
 
     try {
-        const { folderId } = req.body; // Assuming folderId is sent in the body
-        const user = req.user; // Authenticated user information
-
         // Check if the folder to be deleted is the user's root folder
         if (folderId.toString() === user.rootFolder.toString()) {
             return res
